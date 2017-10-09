@@ -186,6 +186,26 @@ func main() {
 
 		fmt.Printf(progHeader)
 
+		ex, _ := os.Executable()
+		cwd := filepath.Dir(ex)
+		// List of potential ffmpeg paths
+		ffmpegPaths := []string{
+			ffmpegPath, path.Join(cwd, "ffmpeg"), path.Join(cwd, "ffmpeg.exe")}
+
+		var verifiedFfmpegPath string
+		for i := 0; i < len(ffmpegPaths); i++ {
+			ffmpegCmd := exec.Command(ffmpegPaths[i], "-version")
+			err := ffmpegCmd.Run()
+			if err == nil {
+				verifiedFfmpegPath = ffmpegPaths[i]
+				break
+			}
+		}
+		if verifiedFfmpegPath == "" {
+			// no ffmpeg found
+			return errors.New("Unable to find valid ffmpeg path")
+		}
+
 		if dlCode == "" {
 			dlCode = input("Enter the Download Code: ", reader)
 		}
@@ -230,11 +250,6 @@ func main() {
 			url.QueryEscape(dlCode), url.QueryEscape(res))
 
 		var absFolderPath string
-		// cwd, _ := os.Getwd()
-
-		ex, _ := os.Executable()
-		cwd := filepath.Dir(ex)
-
 		if dlFolder != "" {
 			absFolderPath, _ = filepath.Abs(dlFolder)
 			if stat, err := os.Stat(absFolderPath); err != nil || !stat.IsDir() {
@@ -285,23 +300,6 @@ func main() {
 			return nil
 		}
 
-		// List of potential ffmpeg paths
-		ffmpegPaths := []string{
-			ffmpegPath, path.Join(cwd, "ffmpeg"), path.Join(cwd, "ffmpeg.exe")}
-
-		var verifiedFfmpegPath string
-		for i := 0; i < len(ffmpegPaths); i++ {
-			ffmpegCmd := exec.Command(ffmpegPaths[i], "-version")
-			err := ffmpegCmd.Run()
-			if err == nil {
-				verifiedFfmpegPath = ffmpegPaths[i]
-				break
-			}
-		}
-		if verifiedFfmpegPath == "" {
-			// no ffmpeg found
-			return errors.New("Unable to find valid ffmpeg path")
-		}
 		ffmpegLogLevel := "fatal"
 		ffmpegCmd := genFfmpegCmd(
 			verifiedFfmpegPath, ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
