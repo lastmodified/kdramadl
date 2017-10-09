@@ -12,19 +12,7 @@ env:
   - FFMPEGBIN="$HOME/bin/ffmpeg_bin" DIST="$HOME/dist"
 
 before_script:
-  # Download and extract binaries
-  # Windows 64-bit
   - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
-  - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/" && ls "$FFMPEGBIN/win64/ffmpeg.exe"
-  # Windows 32-bit
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
-  - unzip -jq "$FFMPEGBIN/win32/ffmpeg_win32.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win32/" && ls "$FFMPEGBIN/win32/ffmpeg.exe"
-  # MacOS
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
-  - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
-  - go get github.com/golang/lint && go install github.com/golang/lint/golint
-  - pwd && ls -ltr "$FFMPEGBIN/"
 
 script:
   - CWD=`pwd`
@@ -39,15 +27,31 @@ script:
   - ls -ltr "$DIST/"
   # Check binary
   - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
-  # Package Linux versions
+  - set +e
+
+before_deploy:
+  - set -e
+  # Download binaries ------------------
+  # Windows 64-bit
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
+  - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/" && ls "$FFMPEGBIN/win64/ffmpeg.exe"
+  # Windows 32-bit
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
+  - unzip -jq "$FFMPEGBIN/win32/ffmpeg_win32.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win32/" && ls "$FFMPEGBIN/win32/ffmpeg.exe"
+  # MacOS
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
+  - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
+  - go get github.com/golang/lint && go install github.com/golang/lint/golint
+  # Packaging ---------------------------
+  # Linux versions
   - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
   - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' && cd "$CWD"
-  # Package MacOS versions
+  # MacOS versions
   - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64_ffmpeg.zip' 'kdramadl' 'ffmpeg'
     && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
-  # Package Window 32-bit versions
+  # Window 32-bit versions
   - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
@@ -59,3 +63,13 @@ script:
     && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
   - ls -ltr "$DIST/"
   - set +e
+
+deploy:
+  provider: releases
+  api_key:
+    secure: qQfI/8frBdnQnNCyASnCiWFbdZP4yrOAHG+yI5WXn1oJbzrZXK4as9+KNl/hGEYIQr0bRTxxGXWg3mzA3DhbMJbSJ9P8grWeKNjK2thrEqs7rZRbVBYYuP5QZxvjvtxAl/fWVa7tnKgGRsycxr86oiicqKy46/aTMHITxqGIa55fhJ2Mo5GyiIhn3tpWzzsUooq2OjEvwLucUFWSMoW50khzsEDgbWjqtQQH+awhK0ULYWgtcyDzsNZkUqQzGMrd6XvH72PDeC9kzRsCrYV1CI53bq0lw2qJKKQiE5bMq2OzytXV9G19LzoAWKSxlhUvVq4tRwVTCcagekQU+Mj5H1477b82fihaPyq/A/iscuCOQrtYAlDHNlWhT5c09ctsN4qmlKjuwV+KxuBBuewzvaQ8XRc/ODAtPLKF4jlswLT4dyy9g3flQ++N9YBNcW2NEcTPs87i0JUwD0NOJfqEfxrln3u0UmLdeJ9j4iq+aRuMLNtRJpHGGwn4D+qYLSWa6LkkOB/vffzxt6jQRNaFCVbm2S2igqE1rRsz09CEdsmN1N62Ya63i/CKLr4iV4Vp6b1bcQ6mcS9g5ax6S9bSRxvxGmMwxKzzoTY2gZ78XYoMwqP3ky1O0Fun7EJdwv+0E4rEyMn7BGabetWH6vbK8Wn0NpZ0mIpnwkdcZNxr6yc=
+  file_glob: true
+  file: "$DIST/*"
+  skip_cleanup: true
+  on:
+    tags: true
