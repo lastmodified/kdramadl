@@ -44,7 +44,7 @@ script:
   - ./"$DIST/kdramadl_linux_amd64" -h
   # Package Linux versions
   - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
-  - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' cd "$CWD"
+  - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' && cd "$CWD"
   # Package MacOS versions
   - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl'
@@ -54,11 +54,10 @@ script:
   - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd "$CWD"
+    && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
   # Package Window 64-bit versions
   - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd "$CWD"
+    && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
   - ls -ltr "$DIST/"
-  - ls -ltr "$DIST/kdramadl_*.*"
