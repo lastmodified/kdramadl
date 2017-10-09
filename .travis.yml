@@ -9,6 +9,14 @@ branches:
   - master
 
 before_install:
+  # Download and extract binaries
+  - mkdir -p ffmpeg_bin/win64 ffmpeg_bin/win32 ffmpeg_bin/osx 
+  - curl -o 'ffmpeg_bin/win64/ffmpeg_win64.zip' 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
+  - unzip -jq 'ffmpeg_bin/win64/ffmpeg_win64.zip' '*/bin/ffmpeg.exe' -d 'ffmpeg_bin/win64/' && ls 'ffmpeg_bin/win64/ffmpeg.exe'
+  - curl -o 'ffmpeg_bin/win32/ffmpeg_win32.zip' 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
+  - unzip -jq 'ffmpeg_bin/win32/ffmpeg_win32.zip' '*/bin/ffmpeg.exe' -d 'ffmpeg_bin/win32/' && ls 'ffmpeg_bin/win32/ffmpeg.exe'
+  - curl -o 'ffmpeg_bin/osx/ffmpeg_osx.zip' 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
+  - unzip 'ffmpeg_bin/osx/ffmpeg_osx.zip' 'ffmpeg' -d 'ffmpeg_bin/osx/' && ls 'ffmpeg_bin/osx/ffmpeg'
   - go get github.com/golang/lint && go install github.com/golang/lint/golint
 
 script:
@@ -23,3 +31,22 @@ script:
   - ls -ltr
   # Check binary
   - ./kdramadl_linux_amd64 -h
+  # Package Linux versions
+  - mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl'
+  - mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl'
+  # Package MacOS versions
+  - mv 'kdramadl_osx_amd64' 'kdramadl' && cp -p 'ffmpeg_bin/osx/ffmpeg' .
+  - zip 'kdramadl_macos_amd64.zip' 'kdramadl'
+  - zip 'kdramadl_macos_amd64_ffmpeg.zip' 'kdramadl' 'ffmpeg'
+  - rm 'kdramadl' 'ffmpeg'
+  # Package Window 32-bit versions
+  - mv 'kdramadl_386.exe' 'kdramadl.exe' && cp -p 'ffmpeg_bin/win32/ffmpeg.exe' .
+  - zip 'kkdramadl_windows_32bit.zip' 'kdramadl.exe'
+  - zip 'kkdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
+  - rm 'kdramadl.exe' 'ffmpeg.exe'
+  # Package Window 64-bit versions
+  - mv 'kdramadl_amd64.exe' 'kdramadl.exe' && cp -p 'ffmpeg_bin/win64/ffmpeg.exe' .
+  - zip 'kkdramadl_windows_64bit.zip' 'kdramadl.exe'
+  - zip 'kkdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
+  - rm 'kdramadl.exe' 'ffmpeg.exe'
+  - ls -ltr
