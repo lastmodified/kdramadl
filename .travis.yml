@@ -2,71 +2,64 @@ dist: trusty
 language: go
 
 go:
-  - 1.9
+- 1.9
 
 env:
-  - FFMPEGBIN="$HOME/bin/ffmpeg_bin" DIST="$HOME/dist"
+- FFMPEGBIN="$HOME/bin/ffmpeg_bin" DIST="$HOME/dist"
 
 before_script:
-  - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
-  - go get github.com/golang/lint && go install github.com/golang/lint/golint
+- mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
+- go get github.com/golang/lint && go install github.com/golang/lint/golint
 
 script:
-  - CWD=`pwd`
-  - golint kdramadl.go
-  - go tool vet kdramadl.go
-  - set -e
-  - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
-  - GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
-  - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
-  - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
-  - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
-  - ls -ltr "$DIST/"
-  # Check binary
-  - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
-  - set +e
+- CWD=`pwd`
+- golint kdramadl.go
+- go tool vet kdramadl.go
+- set -e
+- GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
+- GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
+- GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
+- GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
+- GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
+- ls -ltr "$DIST/"
+- cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
+- set +e
 
 before_deploy:
-  - set -e
-  # Download binaries ------------------
-  # Windows 64-bit
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
-  - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/" && ls "$FFMPEGBIN/win64/ffmpeg.exe"
-  # Windows 32-bit
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
-  - unzip -jq "$FFMPEGBIN/win32/ffmpeg_win32.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win32/" && ls "$FFMPEGBIN/win32/ffmpeg.exe"
-  # MacOS
-  - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
-  - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
-  # Packaging ---------------------------
-  # Linux versions
-  - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
-  - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' && cd "$CWD"
-  # MacOS versions
-  - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64' 'kdramadl'
-    && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl'
-    && zip -jq 'kdramadl_macos_amd64_ffmpeg.zip' 'kdramadl' 'ffmpeg'
-    && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
-  # Window 32-bit versions
-  - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe' 'kdramadl.exe'
-    && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
-    && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
-  # Package Window 64-bit versions
-  - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe' 'kdramadl.exe'
-    && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
-    && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
-  - ls -ltr "$DIST/"
-  - set +e
+- set -e
+- curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
+- unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/"
+  && ls "$FFMPEGBIN/win64/ffmpeg.exe"
+- curl -S -L --retry 2 -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
+- unzip -jq "$FFMPEGBIN/win32/ffmpeg_win32.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win32/"
+  && ls "$FFMPEGBIN/win32/ffmpeg.exe"
+- curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
+- unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
+- cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz'
+  'kdramadl' && rm 'kdramadl' & cd "$CWD"
+- cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz'
+  'kdramadl' && rm 'kdramadl' && cd "$CWD"
+- cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64'
+  'kdramadl' && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl' && zip -jq 'kdramadl_macos_amd64_ffmpeg.zip'
+  'kdramadl' 'ffmpeg' && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
+- cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe'
+  'kdramadl.exe' && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe' && zip -jq
+  'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
+  'ffmpeg.exe' && cd "$CWD"
+- cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe'
+  'kdramadl.exe' && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe' && zip -jq
+  'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
+  'ffmpeg.exe' && cd "$CWD"
+- ls -ltr "$DIST/"
+- set +e
 
 deploy:
   provider: releases
   api_key:
-    secure: MV0FoYVN4Id4KaMiuKdaZduv0b8iEXSODjrU3RCi4VyeswkfI7O8noJ2aKfmlFs6owKd4sILcDPbJoz+1rhDtpnN6b+6qLpjT68GIHSl6Cl2hk52oeeciTjfd/UuFvLqjzHqpWY4KZ5Rzdsw0hjSeWgC1a8NLofrnRB1IakOfp3sDQOvlACDwkMjxFmBy6BlYBqWLSY8mZyPiaAp5/OrlIdA3SdQWkeO3ATBXkAqSvbiBmXzuLoYHQsfVCvouKH3NEZ/z+KZ5ScdYmUNQ5pgO80hhf3P8uettPa9NVrLpKJp6eoYF0yWoKf42OA2tOiTUgu9dKs1phoy1w4vF14buasYQYRpxVwZp89Ct/HhdTi0QyR3jQABGcO09oacAxkrgTx942VOlgRdZJcCWMnPNwNkxharqKDUhZ/IWw83L7ciuItflWEzaLiKpM8mMaNmd/Smp6R4E0TP2fiXe6Vvp0XjwiR+xld80FO4I7MtOkHMBORwnt96Gs7gN+mGxea0doMCddouAMq1U/VkKJoAgh8HtXF2k9DuJEXfmxA3WI2sY9RyBTXKWIFo5pnWWDBW6klUiifvS1CwT6eNgZRRbqZublhnX9KB3jmae6/8DyQCVyCDmGh+t98kMt2moHnVucC4ksK1KI/DwXL0WMwst6heYaFDvBexreth2YxYZUA=
+    secure: ic/Bj4emytRM//LQ6f8zgLTc4/MTi/L6XFvOkwlvdRkwS970K9P2JPAGDu0EudbSrvzHuHqmghGogfXicQWItKxf1+JHwsXdVJ4J3ANjDG23Vicpce28C0hOhlgzq1X0UL1EIwE5RLi2ILGFnr88FWXbYK/VQ0Cf49RxyornZOOowNUTMOt97+UY+6z//LEHrQm374oPqxbwzqJIjQjINqmWspr6mY3aPa7NU1KN70MsVF/EAUXjKtY8c0a9m7yqkfCcpTv2lEp6ezAMuT53Q6IHQ/hxtjFd2cswBUrWn1ARypgF53nP5QQT8G9S54Ll80neO2KMBRAKHY2/fgF+pBjYQX9Ii8Ux+fwDNWGX6OdzVNblXePIqLCLnJ29ZHEbNY2b1MZnDNHxn5Zz8qrWUJvWZFQYkbDHpEmdCJgtZQGIlW0EhAfNU314OPh7TCPE4lOoDl3oB1jTIFo8QPoLlsbSFmdUUjm9Yj3nOpCiGNq62OpQRlXLvkuYBfdm7Jaq2gq6dBUP+3IrBnZNy7lZ+JqN3lV6u/tUXMY2P5dy8C6yhGgQqCtin4anai4CbG7vlDy4vhge6/rqF4/Z8vzmCY767SjSGoI8Cp0HIAy3vzKqw1T4dwcuMyu4iNqiHKemEKaYUdW+dnJSgnTDCMleejipsT6ksu8kMq1v7gVXmMQ=
+  skip_cleanup: true
   file_glob: true
   file: "$DIST/*"
-  skip_cleanup: true
   on:
     repo: lastmodified/kdramadl
     tags: true
