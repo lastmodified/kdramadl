@@ -246,9 +246,6 @@ func main() {
 		vidFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v", fileName, format))
 		partFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v.part", fileName, format))
 
-		fmt.Println(subFilePath)
-		fmt.Println(vidFilePath)
-		return nil
 		httpClient := &http.Client{}
 
 		// Download subtitles
@@ -357,11 +354,12 @@ func main() {
 		if _, err := os.Stat(vidFilePath); !os.IsNotExist(err) {
 			prnInfo(fmt.Sprintf("Saved video %v", vidFilePath))
 		}
+		input("\bPress ENTER to continue...", reader)
 		return nil
 	}
 	err := app.Run(os.Args)
 	if err != nil {
 		fmt.Printf("\n[x] %v\n\n", err)
+		input("\bPress ENTER to continue...", reader)
 	}
-	input("\bPress ENTER to continue...", reader)
 }
