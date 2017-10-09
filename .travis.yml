@@ -9,7 +9,7 @@ branches:
   - master
 
 env:
-  - FFMPEGBIN="$HOME/ffmpeg_bin" DIST="$HOME/dist"
+  - FFMPEGBIN="bin/ffmpeg_bin" DIST="dist"
 
 before_install:
   # Download and extract binaries
