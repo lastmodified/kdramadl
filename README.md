@@ -16,30 +16,33 @@ Alternatively, you may launch it from the Command Prompt / Terminal.
 
 ```
 NAME:
-   kdramadl - Make sure you have ffmpeg installed in PATH or in the current folder.
+   kdramadl - Alternative downloader for https://kdrama.anontpp.com
 
 USAGE:
    kdramadl [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.1
+   0.0.6
 
 DESCRIPTION:
-   Alternative downloader for https://kdrama.anontpp.com
+   Make sure you have ffmpeg installed in PATH or in the current folder.
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --dc value        Download Code
-   --res value       Resolution of video. Choose from: "1080p" "720p" "480p" "360p". Default is "1080p".
-   --format value    Video format. Choose from: "mkv" "mp4". Default is "mkv".
-   --filename value  Filename to save as (without extension).
-   --sub             Download only subtitles.
-   --ffmpeg value    Path to ffmpeg executable. (default: "ffmpeg")
-   --folder value    Path to download folder.
-   --alt             Use kdrama.armsasuncion.com instead of kdrama.anontpp.com
-   --timeout value   Connection timeout interval in seconds. Default 10. (default: 10)
-   --help, -h        show help
-   --version, -v     print the version
+   -c value, --code value        Download Code
+   -r value, --resolution value  Resolution of video. Choose from: "1080p" "720p" "480p" "360p". Default is "1080p".
+   -f value, --format value      Video format. Choose from: "mkv" "mp4". Default is "mkv".
+   --filename value              Filename to save as (without extension).
+   --sub                         Download only subtitles.
+   --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
+   --folder value                Path to download folder.
+   --alt                         Use kdrama.armsasuncion.com instead of kdrama.anontpp.com
+   --timeout value               Connection timeout interval in seconds. Default 10. (default: 10)
+   --help, -h                    show help
+   --version, -v                 print the version
+
+COPYRIGHT:
+   2017 https://github.com/lastmodified/
 ```
