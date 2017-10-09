@@ -34,18 +34,18 @@ import (
 	"github.com/urfave/cli"
 )
 
-const Version = "0.0.1"
-const FormatMKV = "mkv"
-const FormatMP4 = "mp4"
+const version = "0.0.1"
+const formatMKV = "mkv"
+const formatMP4 = "mp4"
 
-var formats = []string{FormatMKV, FormatMP4}
+var formats = []string{formatMKV, formatMP4}
 var resolutions = []string{"1080p", "720p", "480p", "360p"}
 
 var progHeader = fmt.Sprintf(
 	`=====================================================
 KDRAMA DOWNLOADER (%v)
 =====================================================
-`, Version)
+`, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
 
 func stringInSlice(a string, list []string) bool {
@@ -66,12 +66,12 @@ func genFfmpegArgs(
 		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-reconnect", "1", "-reconnect_streamed", "1",
 		"-i", vidURL, "-i", subURL}
-	if format == FormatMP4 {
+	if format == formatMP4 {
 		args = append(
 			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
 	}
 	ffmpegOutputFormat := "mp4"
-	if format == FormatMKV {
+	if format == formatMKV {
 		args = append(
 			args, []string{"-c", "copy"}...)
 		ffmpegOutputFormat = "matroska"
@@ -118,7 +118,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "kdramadl"
-	app.Version = Version
+	app.Version = version
 	app.Copyright = "2017 https://github.com/lastmodified/"
 	app.Usage = "Alternative downloader for https://kdrama.anontpp.com"
 	app.Description = "Make sure you have ffmpeg installed in PATH or in the current folder."
@@ -201,7 +201,7 @@ func main() {
 			if res == "" {
 				res = resolutions[0]
 			} else if stringInSlice(res, resolutions) != true {
-				return errors.New(fmt.Sprintf("Invalid resolution: %v", res))
+				return fmt.Errorf("Invalid resolution: %v", res)
 			}
 		}
 		if format == "" {
@@ -211,7 +211,7 @@ func main() {
 			if format == "" {
 				format = formats[0]
 			} else if stringInSlice(format, formats) != true {
-				return errors.New(fmt.Sprintf("Invalid format: %v", format))
+				return fmt.Errorf("Invalid format: %v", format)
 			}
 		}
 
@@ -249,7 +249,7 @@ func main() {
 		httpClient := &http.Client{}
 
 		// Download subtitles
-		if subOnly == true || format == FormatMP4 {
+		if subOnly == true || format == formatMP4 {
 
 			request, _ := http.NewRequest("GET", subURL, nil)
 			request.Header.Set("User-Agent", userAgent)
