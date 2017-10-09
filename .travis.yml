@@ -27,8 +27,11 @@ before_script:
   - pwd && ls -ltr "$FFMPEGBIN/"
 
 script:
-  - pwd && ls -ltr "$FFMPEGBIN/"
-  - ls -ltr "$DIST/"
+  - CWD=`pwd`
+  - ls -ltr "$FFMPEGBIN/"
+  - ls -ltr "$FFMPEGBIN/osx/"
+  - ls -ltr "$FFMPEGBIN/win32/"
+  - ls -ltr "$FFMPEGBIN/win64/"
   - golint kdramadl.go
   - go tool vet kdramadl.go
   - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
@@ -36,25 +39,26 @@ script:
   - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
   - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
   - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
+  - ls -ltr "$DIST/"
   # Check binary
   - ./"$DIST/kdramadl_linux_amd64" -h
   # Package Linux versions
-  - mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl'
-  - mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl'
+  - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
+  - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' cd "$CWD"
   # Package MacOS versions
   - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64_ffmpeg.zip' 'kdramadl' 'ffmpeg'
-    && rm 'kdramadl' 'ffmpeg' && cd ..
+    && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
   # Package Window 32-bit versions
   - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd ..
+    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd "$CWD"
   # Package Window 64-bit versions
   - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd ..
-  - ls -ltr "$DIST/*"
-  - ls -ltr "$DIST/kdramadl_*"
+    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd "$CWD"
+  - ls -ltr "$DIST/"
+  - ls -ltr "$DIST/kdramadl_*.*"
