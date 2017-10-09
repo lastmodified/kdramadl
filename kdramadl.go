@@ -34,7 +34,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const version = "0.0.2"
+const version = "0.0.3"
 const formatMKV = "mkv"
 const formatMP4 = "mp4"
 
