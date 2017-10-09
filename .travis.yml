@@ -12,7 +12,6 @@ env:
   - FFMPEGBIN="bin/ffmpeg_bin" DIST="dist"
 
 before_script:
-  - pwd
   # Download and extract binaries
   # Windows 64-bit
   - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
@@ -25,9 +24,11 @@ before_script:
   - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
   - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
   - go get github.com/golang/lint && go install github.com/golang/lint/golint
+  - pwd && ls -ltr "$FFMPEGBIN/"
 
 script:
-  - pwd
+  - pwd && ls -ltr "$FFMPEGBIN/"
+  - ls -ltr "$DIST/"
   - golint kdramadl.go
   - go tool vet kdramadl.go
   - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
