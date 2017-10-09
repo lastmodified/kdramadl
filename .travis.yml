@@ -9,7 +9,7 @@ branches:
   - master
 
 before_install:
-  - go install github.com/golang/lint
+  - go get github.com/golang/lint && go install github.com/golang/lint
 
 script:
   - golint kdramadl.go
