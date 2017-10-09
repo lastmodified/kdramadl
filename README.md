@@ -4,9 +4,15 @@
 
 ## Install
 
-Download the latest release for your OS.
+Download and extract the [latest release](https://github.com/lastmodified/kdramadl/releases/latest) for your OS.
+
+If you do not have ``ffmpeg`` already installed, use the ``*_ffmpeg.zip`` (example: ``kdramadl_windows_32bit_ffmpeg.zip``) version.
 
 ## Usage
+
+You can launch the downloader by double-clicking on ``kdramadl.exe`` / ``kdramadl`` in Windows Explorer / Finder.
+
+Alternatively, you may launch it from the Command Prompt / Terminal.
 
 ```
 NAME:
