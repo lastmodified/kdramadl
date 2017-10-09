@@ -16,14 +16,14 @@ script:
 - golint kdramadl.go
 - go tool vet kdramadl.go
 - set -e
-- GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
+- GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
 - ls -ltr "$DIST/"
 - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
 - set +e
 
 before_deploy:
 - set -e
-- GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
+- GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
 - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
 - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
 - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
