@@ -28,18 +28,14 @@ before_script:
 
 script:
   - CWD=`pwd`
-  - ls -ltr "$FFMPEGBIN/"
-  - ls -ltr "$FFMPEGBIN/osx/"
-  - ls -ltr "$FFMPEGBIN/win32/"
-  - ls -ltr "$FFMPEGBIN/win64/"
   - golint kdramadl.go
   - go tool vet kdramadl.go
+  - set -e
   - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
   - GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
   - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
   - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
   - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
-  - set -e
   - ls -ltr "$DIST/"
   # Check binary
   - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
@@ -62,3 +58,4 @@ script:
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
     && rm 'kdramadl.exe' 'ffmpeg.exe' && cd "$CWD"
   - ls -ltr "$DIST/"
+  - set +e
