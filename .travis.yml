@@ -56,7 +56,5 @@ script:
     && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
     && rm 'kdramadl.exe' 'ffmpeg.exe'
-  - pwd
-  - ls -ltr
-  - ls -ltr "$DIST"
-  - ls -ltr "$DIST/kdramadl_*"
+  - ls -ltr "$DIST/*"
+  - ls -ltr "$DIST/kdramadl*"
