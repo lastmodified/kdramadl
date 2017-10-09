@@ -4,10 +4,6 @@ language: go
 go:
   - 1.9
 
-branches:
-  only:
-  - master
-
 env:
   - FFMPEGBIN="$HOME/bin/ffmpeg_bin" DIST="$HOME/dist"
 
@@ -72,4 +68,5 @@ deploy:
   file: "$DIST/*"
   skip_cleanup: true
   on:
+    repo: lastmodified/kdramadl
     tags: true
