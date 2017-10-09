@@ -11,10 +11,11 @@ branches:
 env:
   - FFMPEGBIN="bin/ffmpeg_bin" DIST="dist"
 
-before_install:
+before_script:
+  - pwd
   # Download and extract binaries
   # Windows 64-bit
-  - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx"
+  - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
   - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
   - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/" && ls "$FFMPEGBIN/win64/ffmpeg.exe"
   # Windows 32-bit
@@ -26,9 +27,9 @@ before_install:
   - go get github.com/golang/lint && go install github.com/golang/lint/golint
 
 script:
+  - pwd
   - golint kdramadl.go
   - go tool vet kdramadl.go
-  - mkdir -p "$DIST"
   - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
   - GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
   - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
