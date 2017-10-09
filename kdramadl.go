@@ -57,10 +57,10 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func genFfmpegArgs(
-	ffmpegLogLevel string, timeout int,
+func genFfmpegCmd(
+	ffmpegPath string, ffmpegLogLevel string, timeout int,
 	vidURL string, subURL string,
-	format string, partFilePath string) []string {
+	format string, partFilePath string) *exec.Cmd {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
@@ -78,7 +78,11 @@ func genFfmpegArgs(
 	}
 	args = append(
 		args, []string{"-bsf:a", "aac_adtstoasc", "-f", ffmpegOutputFormat, partFilePath}...)
-	return args
+	ffmpegCmd := exec.Command(ffmpegPath, args...)
+	ffmpegCmd.Stderr = os.Stderr
+	ffmpegCmd.Stdout = os.Stdout
+	ffmpegCmd.Stdin = os.Stdin
+	return ffmpegCmd
 }
 
 func input(promptText string, reader *bufio.Reader) string {
@@ -299,21 +303,13 @@ func main() {
 			return errors.New("Unable to find valid ffmpeg path")
 		}
 		ffmpegLogLevel := "fatal"
-		args := genFfmpegArgs(
-			ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
-		ffmpegCmd := exec.Command(verifiedFfmpegPath, args...)
-		ffmpegCmd.Stderr = os.Stderr
-		ffmpegCmd.Stdout = os.Stdout
-		ffmpegCmd.Stdin = os.Stdin
+		ffmpegCmd := genFfmpegCmd(
+			verifiedFfmpegPath, ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
 
 		if err := ffmpegCmd.Run(); err != nil {
 			// Retry with a more verbose loglevel
-			args := genFfmpegArgs(
-				"warning", timeout, vidURL, subURL, format, partFilePath)
-			ffmpegCmd := exec.Command(verifiedFfmpegPath, args...)
-			ffmpegCmd.Stderr = os.Stderr
-			ffmpegCmd.Stdout = os.Stdout
-			ffmpegCmd.Stdin = os.Stdin
+			ffmpegCmd := genFfmpegCmd(
+				verifiedFfmpegPath, "warning", timeout, vidURL, subURL, format, partFilePath)
 			err := ffmpegCmd.Run()
 			if err != nil {
 				// Do http request to check what's wrong
