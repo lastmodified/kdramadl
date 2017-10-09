@@ -34,18 +34,18 @@ import (
 	"github.com/urfave/cli"
 )
 
-const VERSION = "0.0.1"
-const FORMAT_MKV = "mkv"
-const FORMAT_MP4 = "mp4"
+const Version = "0.0.1"
+const FormatMKV = "mkv"
+const FormatMP4 = "mp4"
 
-var formats = []string{FORMAT_MKV, FORMAT_MP4}
+var formats = []string{FormatMKV, FormatMP4}
 var resolutions = []string{"1080p", "720p", "480p", "360p"}
 
 var progHeader = fmt.Sprintf(
 	`=====================================================
 KDRAMA DOWNLOADER (%v)
 =====================================================
-`, VERSION)
+`, Version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
 
 func stringInSlice(a string, list []string) bool {
@@ -59,19 +59,19 @@ func stringInSlice(a string, list []string) bool {
 
 func genFfmpegArgs(
 	ffmpegLogLevel string, timeout int,
-	vidUrl string, subUrl string,
+	vidURL string, subURL string,
 	format string, partFilePath string) []string {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-reconnect", "1", "-reconnect_streamed", "1",
-		"-i", vidUrl, "-i", subUrl}
-	if format == FORMAT_MP4 {
+		"-i", vidURL, "-i", subURL}
+	if format == FormatMP4 {
 		args = append(
 			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
 	}
 	ffmpegOutputFormat := "mp4"
-	if format == FORMAT_MKV {
+	if format == FormatMKV {
 		args = append(
 			args, []string{"-c", "copy"}...)
 		ffmpegOutputFormat = "matroska"
@@ -118,7 +118,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "kdramadl"
-	app.Version = VERSION
+	app.Version = Version
 	app.Copyright = "2017 https://github.com/lastmodified/"
 	app.Usage = "Alternative downloader for https://kdrama.anontpp.com"
 	app.Description = "Make sure you have ffmpeg installed in PATH or in the current folder."
@@ -219,9 +219,9 @@ func main() {
 		if altHost == true {
 			hostname = "https://kdrama.armsasuncion.com/"
 		}
-		subUrl := fmt.Sprintf(
+		subURL := fmt.Sprintf(
 			"%v?dcode=%v&downloadccsub=1", hostname, url.QueryEscape(dlCode))
-		vidUrl := fmt.Sprintf(
+		vidURL := fmt.Sprintf(
 			"%v?dcode=%v&quality=%v&downloadmp4vid=1", hostname,
 			url.QueryEscape(dlCode), url.QueryEscape(res))
 
@@ -249,35 +249,31 @@ func main() {
 		httpClient := &http.Client{}
 
 		// Download subtitles
-		if subOnly == true || format == FORMAT_MP4 {
+		if subOnly == true || format == FormatMP4 {
 
-			request, _ := http.NewRequest("GET", subUrl, nil)
+			request, _ := http.NewRequest("GET", subURL, nil)
 			request.Header.Set("User-Agent", userAgent)
 			response, err := httpClient.Do(request)
 			if err != nil {
-				return errors.New(
-					fmt.Sprintf("Error downloading subtitles: %v", err))
+				return fmt.Errorf("Error downloading subtitles: %v", err)
 			}
 			if response.StatusCode >= 400 {
-				return errors.New(
-					fmt.Sprintf("Error downloading subtitles: HTTP %v", response.StatusCode))
+				return fmt.Errorf("Error downloading subtitles: HTTP %v", response.StatusCode)
 			}
 			contentType := response.Header.Get("content-type")
 			if strings.Contains(contentType, "text/html") {
-				return errors.New(
-					fmt.Sprintf(
-						"Error downloading subtitles: Unexpected Content-Type \"%v\"",
-						contentType))
+				return fmt.Errorf(
+					"Error downloading subtitles: Unexpected Content-Type \"%v\"",
+					contentType)
 			}
 			defer response.Body.Close()
 			output, err := os.Create(subFilePath)
 			if err != nil {
-				return errors.New(fmt.Sprintf("%v already exists", subFilePath))
+				return fmt.Errorf("%v already exists", subFilePath)
 			}
 			defer output.Close()
 			if _, err := io.Copy(output, response.Body); err != nil {
-				return errors.New(
-					fmt.Sprintf("Error downloading subtitles: %v", err))
+				return fmt.Errorf("Error downloading subtitles: %v", err)
 			}
 			prnInfo(fmt.Sprintf("Saved subtitles: %v", subFilePath))
 		}
@@ -304,7 +300,7 @@ func main() {
 		}
 		ffmpegLogLevel := "fatal"
 		args := genFfmpegArgs(
-			ffmpegLogLevel, timeout, vidUrl, subUrl, format, partFilePath)
+			ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
 		ffmpegCmd := exec.Command(verifiedFfmpegPath, args...)
 		ffmpegCmd.Stderr = os.Stderr
 		ffmpegCmd.Stdout = os.Stdout
@@ -313,7 +309,7 @@ func main() {
 		if err := ffmpegCmd.Run(); err != nil {
 			// Retry with a more verbose loglevel
 			args := genFfmpegArgs(
-				"warning", timeout, vidUrl, subUrl, format, partFilePath)
+				"warning", timeout, vidURL, subURL, format, partFilePath)
 			ffmpegCmd := exec.Command(verifiedFfmpegPath, args...)
 			ffmpegCmd.Stderr = os.Stderr
 			ffmpegCmd.Stdout = os.Stdout
@@ -321,26 +317,23 @@ func main() {
 			err := ffmpegCmd.Run()
 			if err != nil {
 				// Do http request to check what's wrong
-				request, _ := http.NewRequest("GET", subUrl, nil)
+				request, _ := http.NewRequest("GET", subURL, nil)
 				request.Header.Set("User-Agent", userAgent)
 				response, err := httpClient.Do(request)
 
 				if err != nil {
-					return errors.New(
-						fmt.Sprintf("Error downloading video: %v", err))
+					return fmt.Errorf("Error downloading video: %v", err)
 				}
 				if response.StatusCode >= 400 {
-					return errors.New(
-						fmt.Sprintf("Error downloading video: HTTP %v", response.StatusCode))
+					return fmt.Errorf("Error downloading video: HTTP %v", response.StatusCode)
 				}
 				contentType := response.Header.Get("content-type")
 				if strings.Contains(contentType, "text/html") {
-					return errors.New(
-						fmt.Sprintf(
-							"Error downloading video: Unexpected Content-Type \"%v\"",
-							contentType))
+					return fmt.Errorf(
+						"Error downloading video: Unexpected Content-Type \"%v\"",
+						contentType)
 				}
-				return errors.New(fmt.Sprintf("ffmpeg Error: %v", err))
+				return fmt.Errorf("ffmpeg Error: %v", err)
 			}
 		}
 		if _, err := os.Stat(partFilePath); !os.IsNotExist(err) {
