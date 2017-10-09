@@ -9,8 +9,8 @@ branches:
   - master
 
 env:
-  - FFMPEGBIN="$HOME/ffmpeg_bin"
-  - DIST="$HOME/dist"
+  - FFMPEGBIN="$HOME/ffmpeg_bin" DIST="$HOME/dist"
+
 before_install:
   # Download and extract binaries
   # Windows 64-bit
