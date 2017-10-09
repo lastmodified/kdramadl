@@ -15,14 +15,14 @@ before_install:
   # Download and extract binaries
   # Windows 64-bit
   - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx"
-  - curl -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
   - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/" && ls "$FFMPEGBIN/win64/ffmpeg.exe"
   # Windows 32-bit
-  - curl -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/win32/ffmpeg_win32.zip" 'https://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.3.3-win32-static.zip'
   - unzip -jq "$FFMPEGBIN/win32/ffmpeg_win32.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win32/" && ls "$FFMPEGBIN/win32/ffmpeg.exe"
   # MacOS
-  - curl -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
-  - unzip "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
+  - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
+  - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
   - go get github.com/golang/lint && go install github.com/golang/lint/golint
 
 script:
@@ -56,4 +56,7 @@ script:
     && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
     && rm 'kdramadl.exe' 'ffmpeg.exe'
+  - pwd
+  - ls -ltr
+  - ls -ltr "$DIST"
   - ls -ltr "$DIST/kdramadl_*"
