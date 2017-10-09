@@ -17,16 +17,16 @@ script:
 - go tool vet kdramadl.go
 - set -e
 - GOOS=linux GOARCH=386 go build -o "$DIST/kdramadl_linux_386" 'kdramadl.go'
-- GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
-- GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
-- GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
-- GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
 - ls -ltr "$DIST/"
 - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
 - set +e
 
 before_deploy:
 - set -e
+- GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
+- GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
+- GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
+- GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
 - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
 - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/"
   && ls "$FFMPEGBIN/win64/ffmpeg.exe"
@@ -48,7 +48,7 @@ before_deploy:
   'ffmpeg.exe' && cd "$CWD"
 - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe'
   'kdramadl.exe' && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe' && zip -jq
-  'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
+  'kdramadl_windows_64bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
   'ffmpeg.exe' && cd "$CWD"
 - ls -ltr "$DIST/"
 - set +e
