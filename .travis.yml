@@ -36,27 +36,25 @@ script:
   - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
   - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
   - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
-  - cd "$DIST"
-  - ls -ltr
   # Check binary
-  - ./kdramadl_linux_amd64 -h
+  - "./$DIST/kdramadl_linux_amd64" -h
   # Package Linux versions
   - mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl'
   - mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl'
   # Package MacOS versions
-  - mv 'kdramadl_osx_amd64' 'kdramadl' && cp -p "$FFMPEGBIN/osx/ffmpeg" .
+  - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64.zip' 'kdramadl'
     && zip -jq 'kdramadl_macos_amd64_ffmpeg.zip' 'kdramadl' 'ffmpeg'
-    && rm 'kdramadl' 'ffmpeg'
+    && rm 'kdramadl' 'ffmpeg' && cd ..
   # Package Window 32-bit versions
-  - mv 'kdramadl_386.exe' 'kdramadl.exe' && cp -p "$FFMPEGBIN/win32/ffmpeg.exe" .
+  - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe'
+    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd ..
   # Package Window 64-bit versions
-  - mv 'kdramadl_amd64.exe' 'kdramadl.exe' && cp -p "$FFMPEGBIN/win64/ffmpeg.exe" .
+  - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
     && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
-    && rm 'kdramadl.exe' 'ffmpeg.exe'
+    && rm 'kdramadl.exe' 'ffmpeg.exe' & cd ..
   - ls -ltr "$DIST/*"
-  - ls -ltr "$DIST/kdramadl*"
+  - ls -ltr "$DIST/kdramadl_*"
