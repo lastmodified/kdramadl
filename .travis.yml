@@ -1,0 +1,25 @@
+dist: trusty
+language: go
+
+go:
+  - 1.9
+
+branches:
+  only:
+  - master
+
+before_install:
+  - go install github.com/golang/lint
+
+script:
+  - golint kdramadl.go
+  - mkdir -p dist
+  - GOOS=linux GOARCH=386 go build -o 'dist/kdramadl_linux_386' 'kdramadl.go'
+  - GOOS=linux GOARCH=amd64 go build -o 'dist/kdramadl_linux_amd64' 'kdramadl.go'
+  - GOOS=darwin GOARCH=amd64 go build -o 'dist/kdramadl_osx_amd64' 'kdramadl.go'
+  - GOOS=windows GOARCH=386 go build -o 'dist/kdramadl_386.exe' 'kdramadl.go'
+  - GOOS=windows GOARCH=amd64 go build -o 'dist/kdramadl_amd64.exe' 'kdramadl.go'
+  - cd dist
+  - ls -ltr
+  # Check binary
+  - ./kdramadl_linux_amd64 -h
