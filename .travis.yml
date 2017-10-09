@@ -48,12 +48,12 @@ script:
     && rm 'kdramadl' 'ffmpeg'
   # Package Window 32-bit versions
   - mv 'kdramadl_386.exe' 'kdramadl.exe' && cp -p "$FFMPEGBIN/win32/ffmpeg.exe" .
-    && zip -jq 'kkdramadl_windows_32bit.zip' 'kdramadl.exe'
-    && zip -jq 'kkdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
+    && zip -jq 'kdramadl_windows_32bit.zip' 'kdramadl.exe'
+    && zip -jq 'kdramadl_windows_32bit_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
     && rm 'kdramadl.exe' 'ffmpeg.exe'
   # Package Window 64-bit versions
   - mv 'kdramadl_amd64.exe' 'kdramadl.exe' && cp -p "$FFMPEGBIN/win64/ffmpeg.exe" .
-    && zip -jq 'kkdramadl_windows_64bit.zip' 'kdramadl.exe'
-    && zip -jq 'kkdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
+    && zip -jq 'kdramadl_windows_64bit.zip' 'kdramadl.exe'
+    && zip -jq 'kdramadl_windows_64but_ffmpeg.zip' 'kdramadl.exe' 'ffmpeg.exe'
     && rm 'kdramadl.exe' 'ffmpeg.exe'
-  - ls -ltr "$DIST/kdramadl_*.*"
+  - ls -ltr "$DIST/kdramadl_*"
