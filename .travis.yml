@@ -39,9 +39,10 @@ script:
   - GOOS=darwin GOARCH=amd64 go build -o "$DIST/kdramadl_osx_amd64" 'kdramadl.go'
   - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
   - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
+  - set -e
   - ls -ltr "$DIST/"
   # Check binary
-  - "$DIST/kdramadl_linux_amd64" -h
+  - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
   # Package Linux versions
   - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
   - cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' && tar -zcf 'kdramadl_linux_amd64.tar.gz' 'kdramadl' && rm 'kdramadl' && cd "$CWD"
