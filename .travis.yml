@@ -13,6 +13,7 @@ env:
 
 before_script:
   - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
+  - go get github.com/golang/lint && go install github.com/golang/lint/golint
 
 script:
   - CWD=`pwd`
@@ -41,7 +42,6 @@ before_deploy:
   # MacOS
   - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
   - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
-  - go get github.com/golang/lint && go install github.com/golang/lint/golint
   # Packaging ---------------------------
   # Linux versions
   - cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' && tar -zcf 'kdramadl_linux_386.tar.gz' 'kdramadl' && rm 'kdramadl' & cd "$CWD"
