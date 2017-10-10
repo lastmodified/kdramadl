@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
@@ -206,7 +207,6 @@ func main() {
 				return fmt.Errorf("Invalid format: %v", format)
 			}
 		}
-
 		hostname := "https://kdrama.anontpp.com/"
 		if altHost == true {
 			hostname = "https://kdrama.armsasuncion.com/"
@@ -229,6 +229,9 @@ func main() {
 			// default to current working folder
 			absFolderPath = cwd
 		}
+		logger.Debugf(
+			"Download Code: %v, Resolution: %v, Filename: %v, Format: %v, Folder: %v",
+			dlCode, res, fileName, format, absFolderPath)
 		subFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.srt", fileName))
 		vidFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v", fileName, format))
 		partFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v.part", fileName, format))
@@ -328,7 +331,7 @@ func main() {
 	}
 	err := app.Run(os.Args)
 	if err != nil {
-		logger.Errorf("%v (%v)", err, "asdf")
+		logger.Errorf("%v", err)
 		if !autoQuit {
 			input("\bPress ENTER to continue...", reader)
 		}
@@ -393,18 +396,24 @@ type custLogger struct {
 	level int
 }
 
+var red = color.New(color.FgRed).SprintFunc()
+var yellow = color.New(color.FgYellow).SprintFunc()
+var blue = color.New(color.FgBlue).SprintFunc()
+var green = color.New(color.FgGreen).SprintFunc()
+var bold = color.New(color.Bold).SprintFunc()
+
 func (logger custLogger) Log(level int, message string) {
 	switch level {
 	case levelCritical:
-		message = "<!> " + message
+		message = fmt.Sprintf("%v: %v", red("CRITICAL"), message)
 	case levelError:
-		message = "[x] " + message
+		message = fmt.Sprintf("%v: %v", red("ERROR"), message)
 	case levelWarning:
-		message = "[!] " + message
+		message = fmt.Sprintf("%v: %v", yellow("WARNING"), message)
 	case levelInfo:
-		message = "[*] " + message
+		message = fmt.Sprintf("%v: %v", green("INFO"), message)
 	case levelDebug:
-		message = "[.] " + message
+		message = fmt.Sprintf("%v: %v", blue("DEBUG"), message)
 	}
 
 	if level >= logger.level {
