@@ -47,63 +47,7 @@ KDRAMA DOWNLOADER (%v)
 =====================================================
 `, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
-}
-
-func genFfmpegCmd(
-	ffmpegPath string, ffmpegLogLevel string, timeout int,
-	vidURL string, subURL string,
-	format string, partFilePath string) *exec.Cmd {
-	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
-		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
-		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
-		"-reconnect", "1", "-reconnect_streamed", "1",
-		"-i", vidURL, "-i", subURL}
-	if format == formatMP4 {
-		args = append(
-			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
-	}
-	ffmpegOutputFormat := "mp4"
-	if format == formatMKV {
-		args = append(
-			args, []string{"-c", "copy"}...)
-		ffmpegOutputFormat = "matroska"
-	}
-	args = append(
-		args, []string{"-bsf:a", "aac_adtstoasc", "-f", ffmpegOutputFormat, partFilePath}...)
-	ffmpegCmd := exec.Command(ffmpegPath, args...)
-	ffmpegCmd.Stderr = os.Stderr
-	ffmpegCmd.Stdout = os.Stdout
-	ffmpegCmd.Stdin = os.Stdin
-	return ffmpegCmd
-}
-
-func input(promptText string, reader *bufio.Reader) string {
-	fmt.Print(promptText)
-	response, _ := reader.ReadString('\n')
-	response = strings.Trim(response, " \n")
-	return response
-}
-
-func prnToScreen(text string) {
-	if strings.HasSuffix(text, "\n") {
-		fmt.Printf(text)
-	} else {
-		fmt.Println(text)
-	}
-}
-
-func prnInfo(text string) {
-	text = fmt.Sprintf("[i] %v", text)
-	prnToScreen(text)
-}
+var logger = &custLogger{level: levelInfo}
 
 func main() {
 
@@ -117,6 +61,8 @@ func main() {
 		dlFolder   string
 		altHost    bool
 		timeout    int
+		autoQuit   bool
+		verbose    bool
 	)
 	reader := bufio.NewReader(os.Stdin)
 
@@ -181,9 +127,31 @@ func main() {
 			Usage:       "Connection timeout interval in seconds. Default 10.",
 			Destination: &timeout,
 		},
+		cli.BoolFlag{
+			Name:        "autoquit",
+			Usage:       "Automatically quit when done (skip the \"Press ENTER to continue\" prompt)",
+			Destination: &autoQuit,
+		},
+		cli.BoolFlag{
+			Name:        "verbose",
+			Usage:       "Generate more verbose messages",
+			Destination: &verbose,
+		},
+	}
+	app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
+		if isSubcommand {
+			return err
+		}
+
+		cli.ShowAppHelp(c)
+		fmt.Fprintf(c.App.Writer, "\nUsage error: %v\n", err)
+		return nil
 	}
 	app.Action = func(c *cli.Context) error {
 
+		if verbose {
+			logger.level = levelDebug
+		}
 		fmt.Printf(progHeader)
 
 		ex, _ := os.Executable()
@@ -254,7 +222,7 @@ func main() {
 			absFolderPath, _ = filepath.Abs(dlFolder)
 			if stat, err := os.Stat(absFolderPath); err != nil || !stat.IsDir() {
 				os.MkdirAll(dlFolder, os.ModePerm)
-				prnInfo(fmt.Sprintf("Created folder: %v", absFolderPath))
+				logger.Infof("Created folder: %v", absFolderPath)
 			}
 		}
 		if absFolderPath == "" {
@@ -272,6 +240,7 @@ func main() {
 
 			request, _ := http.NewRequest("GET", subURL, nil)
 			request.Header.Set("User-Agent", userAgent)
+			logger.Debugf("Requesting %v", subURL)
 			response, err := httpClient.Do(request)
 			if err != nil {
 				return fmt.Errorf("Error downloading subtitles: %v", err)
@@ -294,20 +263,31 @@ func main() {
 			if _, err := io.Copy(output, response.Body); err != nil {
 				return fmt.Errorf("Error downloading subtitles: %v", err)
 			}
-			prnInfo(fmt.Sprintf("Saved subtitles: %v", subFilePath))
+			logger.Infof("Saved subtitles: %v", subFilePath)
 		}
 		if subOnly == true {
 			return nil
 		}
 
 		ffmpegLogLevel := "fatal"
+		if verbose {
+			ffmpegLogLevel = "info"
+		}
 		ffmpegCmd := genFfmpegCmd(
 			verifiedFfmpegPath, ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
+		logger.Debugf("Requesting %v", vidURL)
+		logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 
 		if err := ffmpegCmd.Run(); err != nil {
 			// Retry with a more verbose loglevel
+			if ffmpegLogLevel == "fatal" {
+				ffmpegLogLevel = "warning"
+			}
 			ffmpegCmd := genFfmpegCmd(
-				verifiedFfmpegPath, "warning", timeout, vidURL, subURL, format, partFilePath)
+				verifiedFfmpegPath, ffmpegLogLevel, timeout,
+				vidURL, subURL, format, partFilePath)
+			logger.Debugf("Requesting %v", vidURL)
+			logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 			err := ffmpegCmd.Run()
 			if err != nil {
 				// Do http request to check what's wrong
@@ -334,19 +314,117 @@ func main() {
 			// rename .part file to final filename
 			err := os.Rename(partFilePath, vidFilePath)
 			if err != nil {
-				fmt.Printf("Unable to rename file %v to %v\n", partFilePath, vidFilePath)
+				logger.Debugf("Error renaming \"%v\" to \"%v\": %v", partFilePath, vidFilePath, err)
 				return errors.New("Unable to rename file")
 			}
 		}
 		if _, err := os.Stat(vidFilePath); !os.IsNotExist(err) {
-			prnInfo(fmt.Sprintf("Saved video %v", vidFilePath))
+			logger.Infof("Saved video: %v", vidFilePath)
 		}
-		input("\bPress ENTER to continue...", reader)
+		if !autoQuit {
+			input("\bPress ENTER to continue...", reader)
+		}
 		return nil
 	}
 	err := app.Run(os.Args)
 	if err != nil {
-		fmt.Printf("\n[x] %v\n\n", err)
-		input("\bPress ENTER to continue...", reader)
+		logger.Errorf("%v (%v)", err, "asdf")
+		if !autoQuit {
+			input("\bPress ENTER to continue...", reader)
+		}
 	}
 }
+
+func genFfmpegCmd(
+	ffmpegPath string, ffmpegLogLevel string, timeout int,
+	vidURL string, subURL string,
+	format string, partFilePath string) *exec.Cmd {
+	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
+		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
+		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
+		"-reconnect", "1", "-reconnect_streamed", "1",
+		"-i", vidURL, "-i", subURL}
+	if format == formatMP4 {
+		args = append(
+			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
+	}
+	ffmpegOutputFormat := "mp4"
+	if format == formatMKV {
+		args = append(
+			args, []string{"-c", "copy"}...)
+		ffmpegOutputFormat = "matroska"
+	}
+	args = append(
+		args, []string{"-bsf:a", "aac_adtstoasc", "-f", ffmpegOutputFormat, partFilePath}...)
+	ffmpegCmd := exec.Command(ffmpegPath, args...)
+	ffmpegCmd.Stderr = os.Stderr
+	ffmpegCmd.Stdout = os.Stdout
+	ffmpegCmd.Stdin = os.Stdin
+	return ffmpegCmd
+}
+
+func input(promptText string, reader *bufio.Reader) string {
+	fmt.Print(promptText)
+	response, _ := reader.ReadString('\n')
+	response = strings.Trim(response, " \n")
+	return response
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+const (
+	levelCritical = 50
+	levelError    = 40
+	levelWarning  = 30
+	levelInfo     = 20
+	levelDebug    = 10
+	levelNoSet    = 0
+)
+
+// Very basic logger with levels
+type custLogger struct {
+	level int
+}
+
+func (logger custLogger) Log(level int, message string) {
+	switch level {
+	case levelCritical:
+		message = "<!> " + message
+	case levelError:
+		message = "[x] " + message
+	case levelWarning:
+		message = "[!] " + message
+	case levelInfo:
+		message = "[*] " + message
+	case levelDebug:
+		message = "[.] " + message
+	}
+
+	if level >= logger.level {
+		if strings.HasSuffix(message, "\n") {
+			fmt.Print(message)
+		} else {
+			fmt.Println(message)
+		}
+	}
+}
+func (logger custLogger) Logf(level int, msg string, a ...interface{}) {
+	logger.Log(level, fmt.Sprintf(msg, a...))
+}
+func (logger custLogger) Debug(msg string)                       { logger.Log(levelDebug, msg) }
+func (logger custLogger) Info(msg string)                        { logger.Log(levelInfo, msg) }
+func (logger custLogger) Warning(msg string)                     { logger.Log(levelWarning, msg) }
+func (logger custLogger) Error(msg string)                       { logger.Log(levelError, msg) }
+func (logger custLogger) Critical(msg string)                    { logger.Log(levelCritical, msg) }
+func (logger custLogger) Debugf(msg string, a ...interface{})    { logger.Logf(levelDebug, msg, a...) }
+func (logger custLogger) Infof(msg string, a ...interface{})     { logger.Logf(levelInfo, msg, a...) }
+func (logger custLogger) Warningf(msg string, a ...interface{})  { logger.Logf(levelWarning, msg, a...) }
+func (logger custLogger) Errorf(msg string, a ...interface{})    { logger.Logf(levelError, msg, a...) }
+func (logger custLogger) Criticalf(msg string, a ...interface{}) { logger.Logf(levelDebug, msg, a...) }

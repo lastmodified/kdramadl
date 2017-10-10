@@ -40,6 +40,8 @@ GLOBAL OPTIONS:
    --folder value                Path to download folder.
    --alt                         Use kdrama.armsasuncion.com instead of kdrama.anontpp.com
    --timeout value               Connection timeout interval in seconds. Default 10. (default: 10)
+   --autoquit                    Automatically quit when done (skip the "Press ENTER to continue" prompt)
+   --verbose                     Generate more verbose messages
    --help, -h                    show help
    --version, -v                 print the version
 
