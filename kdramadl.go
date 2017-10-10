@@ -134,6 +134,10 @@ func main() {
 			Destination: &autoQuit,
 		},
 		cli.BoolFlag{
+			Name:  "nocolor",
+			Usage: "Disable color output",
+		},
+		cli.BoolFlag{
 			Name:        "verbose",
 			Usage:       "Generate more verbose messages",
 			Destination: &verbose,
@@ -150,6 +154,9 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 
+		if c.Bool("nocolor") {
+			color.NoColor = true
+		}
 		if verbose {
 			logger.level = levelDebug
 		}
