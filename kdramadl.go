@@ -29,6 +29,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/fatih/color"
@@ -48,6 +49,7 @@ KDRAMA DOWNLOADER (%v)
 =====================================================
 `, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
+var invalidCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
 var logger = &custLogger{level: levelInfo}
 
 func main() {
@@ -187,6 +189,8 @@ func main() {
 		}
 		if dlCode == "" {
 			return errors.New("Download Code cannot be blank")
+		} else if invalidCharRegex.MatchString(dlCode) {
+			return errors.New("Invalid Download Code")
 		}
 		if fileName == "" {
 			fileName = input("Enter the Filename (no extension): ", reader)
@@ -194,26 +198,29 @@ func main() {
 		if fileName == "" {
 			return errors.New("Filename cannot be blank")
 		}
+
 		if res == "" {
 			res = input(fmt.Sprintf(
 				"Choose a Resolution (%v). Press ENTER to use the default (%v): ",
 				strings.Join(resolutions, ", "), resolutions[0]), reader)
-			if res == "" {
-				res = resolutions[0]
-			} else if stringInSlice(res, resolutions) != true {
-				return fmt.Errorf("Invalid resolution: %v", res)
-			}
 		}
+		if res == "" {
+			res = resolutions[0]
+		} else if stringInSlice(res, resolutions) != true {
+			return fmt.Errorf("Invalid resolution: %v", res)
+		}
+
 		if format == "" {
 			format = input(fmt.Sprintf(
 				"Choose a Format (%v). Press ENTER to use the default (%v): ",
 				strings.Join(formats, ", "), formats[0]), reader)
-			if format == "" {
-				format = formats[0]
-			} else if stringInSlice(format, formats) != true {
-				return fmt.Errorf("Invalid format: %v", format)
-			}
 		}
+		if format == "" {
+			format = formats[0]
+		} else if stringInSlice(format, formats) != true {
+			return fmt.Errorf("Invalid format: %v", format)
+		}
+
 		hostname := "https://kdrama.anontpp.com/"
 		if altHost == true {
 			hostname = "https://kdrama.armsasuncion.com/"
