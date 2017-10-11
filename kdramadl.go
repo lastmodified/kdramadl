@@ -69,10 +69,15 @@ func main() {
 	)
 	reader := bufio.NewReader(os.Stdin)
 
+	cli.VersionPrinter = func(c *cli.Context) {
+		fmt.Fprintf(
+			c.App.Writer, "%v version %v\nCheck %v for the latest update.\n",
+			c.App.Name, c.App.Version, "https://github.com/lastmodified/kdramadl/releases/latest")
+	}
 	app := cli.NewApp()
 	app.Name = "kdramadl"
 	app.Version = version
-	app.Copyright = "2017 https://github.com/lastmodified/"
+	app.Copyright = "2017 https://github.com/lastmodified/kdramadl"
 	app.Usage = "Alternative downloader for https://kdrama.anontpp.com"
 	app.Description = "Make sure you have ffmpeg installed in PATH or in the current folder."
 	app.Flags = []cli.Flag{
