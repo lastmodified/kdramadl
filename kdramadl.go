@@ -49,7 +49,8 @@ KDRAMA DOWNLOADER (%v)
 =====================================================
 `, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
-var invalidCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
+var invalidDlCodeCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
+var validResRegex = regexp.MustCompile(`^[0-9]{3,4}p$`)
 var logger = &custLogger{level: levelInfo}
 
 func main() {
@@ -89,8 +90,8 @@ func main() {
 		cli.StringFlag{
 			Name: "r, resolution",
 			Usage: fmt.Sprintf(
-				"Resolution of video. Choose from: \"%v\". Default is \"%v\".",
-				strings.Join(resolutions, "\" \""),
+				"Resolution of video, for example: \"%v\". Default is \"%v\".",
+				strings.Join(resolutions, "\", \""),
 				resolutions[0]),
 			Destination: &res,
 		},
@@ -194,7 +195,7 @@ func main() {
 		}
 		if dlCode == "" {
 			return errors.New("Download Code cannot be blank")
-		} else if invalidCharRegex.MatchString(dlCode) {
+		} else if invalidDlCodeCharRegex.MatchString(dlCode) {
 			return errors.New("Invalid Download Code")
 		}
 		if fileName == "" {
@@ -211,7 +212,7 @@ func main() {
 		}
 		if res == "" {
 			res = resolutions[0]
-		} else if stringInSlice(res, resolutions) != true {
+		} else if validResRegex.MatchString(res) != true {
 			return fmt.Errorf("Invalid resolution: %v", res)
 		}
 
@@ -416,7 +417,7 @@ type custLogger struct {
 }
 
 var red = color.New(color.FgRed).SprintFunc()
-var yellow = color.New(color.FgYellow).SprintFunc()
+var yellow = color.New(color.FgYellow).Add(color.BgBlack).SprintFunc()
 var blue = color.New(color.FgBlue).SprintFunc()
 var green = color.New(color.FgGreen).SprintFunc()
 var bold = color.New(color.Bold).SprintFunc()
