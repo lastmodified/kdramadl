@@ -9,7 +9,7 @@ env:
 
 before_script:
 - mkdir -p "$FFMPEGBIN/win64" "$FFMPEGBIN/win32" "$FFMPEGBIN/osx" "$DIST"
-- go get github.com/golang/lint && go install github.com/golang/lint/golint
+- go get -u github.com/golang/lint/golint
 
 script:
 - CWD=`pwd`
