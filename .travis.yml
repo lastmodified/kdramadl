@@ -21,9 +21,9 @@ script:
 - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
 - cd "$FFMPEGBIN" && ls
 - curl -S -L --retry 2 -o "$FFMPEGBIN/linux64/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux64/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux64/" --strip=1 --wildcards '*/ffmpeg' && && ls "$FFMPEGBIN/linux64/ffmpeg"
+- tar -xJf "$FFMPEGBIN/linux64/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux64/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux64/ffmpeg"
 - curl -S -L --retry 2 -o "$FFMPEGBIN/linux32/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-32bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux32/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux32/" --strip=1 --wildcards '*/ffmpeg' && && ls "$FFMPEGBIN/linux32/ffmpeg"
+- tar -xJf "$FFMPEGBIN/linux32/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux32/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux32/ffmpeg"
 - set +e
 
 before_deploy:
@@ -33,9 +33,9 @@ before_deploy:
 - GOOS=windows GOARCH=386 go build -o "$DIST/kdramadl_386.exe" 'kdramadl.go'
 - GOOS=windows GOARCH=amd64 go build -o "$DIST/kdramadl_amd64.exe" 'kdramadl.go'
 - curl -S -L --retry 2 -o "$FFMPEGBIN/linux64/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux64/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux64/" --strip=1 --wildcards '*/ffmpeg' && && ls "$FFMPEGBIN/linux64/ffmpeg"
+- tar -xJf "$FFMPEGBIN/linux64/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux64/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux64/ffmpeg"
 - curl -S -L --retry 2 -o "$FFMPEGBIN/linux32/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-32bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux32/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux32/" --strip=1 --wildcards '*/ffmpeg' && && ls "$FFMPEGBIN/linux32/ffmpeg"
+- tar -xJf "$FFMPEGBIN/linux32/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux32/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux32/ffmpeg"
 - curl -S -L --retry 2 -o "$FFMPEGBIN/win64/ffmpeg_win64.zip" 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-3.3.3-win64-static.zip'
 - unzip -jq "$FFMPEGBIN/win64/ffmpeg_win64.zip" '*/bin/ffmpeg.exe' -d "$FFMPEGBIN/win64/"
   && ls "$FFMPEGBIN/win64/ffmpeg.exe"
