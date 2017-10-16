@@ -19,11 +19,6 @@ script:
 - GOOS=linux GOARCH=amd64 go build -o "$DIST/kdramadl_linux_amd64" 'kdramadl.go'
 - ls -ltr "$DIST/"
 - cd "$DIST" && ./kdramadl_linux_amd64 -h && cd "$CWD"
-- cd "$FFMPEGBIN" && ls
-- curl -S -L --retry 2 -o "$FFMPEGBIN/linux64/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux64/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux64/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux64/ffmpeg"
-- curl -S -L --retry 2 -o "$FFMPEGBIN/linux32/ffmpeg.tar.xz" 'https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-32bit-static.tar.xz'
-- tar -xJf "$FFMPEGBIN/linux32/ffmpeg.tar.xz" -C "$FFMPEGBIN/linux32/" --strip=1 --wildcards '*/ffmpeg' && ls "$FFMPEGBIN/linux32/ffmpeg"
 - set +e
 
 before_deploy:
