@@ -40,23 +40,23 @@ before_deploy:
 - curl -S -L --retry 2 -o "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'http://www.ffmpegmac.net/resources/Lion_Mountain_Lion_Mavericks_Yosemite_El-Captain_15.05.2017.zip'
 - unzip -jq "$FFMPEGBIN/osx/ffmpeg_osx.zip" 'ffmpeg' -d "$FFMPEGBIN/osx/" && ls "$FFMPEGBIN/osx/ffmpeg"
 - cp -p "$FFMPEGBIN/linux32/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_linux_386' 'kdramadl' 
-  && tar -zcf 'kdramadl_linux_386_${TRAVIS_TAG}.tar.gz' 'kdramadl'
-  && tar -zcf 'kdramadl_linux_386_ffmpeg_${TRAVIS_TAG}.tar.gz' 'kdramadl' 'ffmpeg'
+  && tar -zcf "kdramadl_linux_386_${TRAVIS_TAG}.tar.gz" 'kdramadl'
+  && tar -zcf "kdramadl_linux_386_ffmpeg_${TRAVIS_TAG}.tar.gz" 'kdramadl' 'ffmpeg'
   && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
 - cp -p "$FFMPEGBIN/linux64/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_linux_amd64' 'kdramadl' 
-  && tar -zcf 'kdramadl_linux_amd64_${TRAVIS_TAG}.tar.gz' 'kdramadl'
-  && tar -zcf 'kdramadl_linux_amd64_ffmpeg_${TRAVIS_TAG}.tar.gz' 'kdramadl' 'ffmpeg'
+  && tar -zcf "kdramadl_linux_amd64_${TRAVIS_TAG}.tar.gz" 'kdramadl'
+  && tar -zcf "kdramadl_linux_amd64_ffmpeg_${TRAVIS_TAG}.tar.gz" 'kdramadl' 'ffmpeg'
   && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
 - cp -p "$FFMPEGBIN/osx/ffmpeg" "$DIST/" && cd "$DIST" && mv 'kdramadl_osx_amd64'
-  'kdramadl' && zip -jq 'kdramadl_macos_amd64_${TRAVIS_TAG}.zip' 'kdramadl' && zip -jq 'kdramadl_macos_amd64_ffmpeg_${TRAVIS_TAG}.zip'
+  'kdramadl' && zip -jq "kdramadl_macos_amd64_${TRAVIS_TAG}.zip" 'kdramadl' && zip -jq "kdramadl_macos_amd64_ffmpeg_${TRAVIS_TAG}.zip"
   'kdramadl' 'ffmpeg' && rm 'kdramadl' 'ffmpeg' && cd "$CWD"
 - cp -p "$FFMPEGBIN/win32/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_386.exe'
-  'kdramadl.exe' && zip -jq 'kdramadl_windows_32bit_${TRAVIS_TAG}.zip' 'kdramadl.exe' && zip -jq
-  'kdramadl_windows_32bit_ffmpeg_${TRAVIS_TAG}.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
+  'kdramadl.exe' && zip -jq "kdramadl_windows_32bit_${TRAVIS_TAG}.zip" 'kdramadl.exe' && zip -jq
+  "kdramadl_windows_32bit_ffmpeg_${TRAVIS_TAG}.zip" 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
   'ffmpeg.exe' && cd "$CWD"
 - cp -p "$FFMPEGBIN/win64/ffmpeg.exe" "$DIST/" && cd "$DIST" && mv 'kdramadl_amd64.exe'
-  'kdramadl.exe' && zip -jq 'kdramadl_windows_64bit_${TRAVIS_TAG}.zip' 'kdramadl.exe' && zip -jq
-  'kdramadl_windows_64bit_ffmpeg_${TRAVIS_TAG}.zip' 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
+  'kdramadl.exe' && zip -jq "kdramadl_windows_64bit_${TRAVIS_TAG}.zip" 'kdramadl.exe' && zip -jq
+  "kdramadl_windows_64bit_ffmpeg_${TRAVIS_TAG}.zip" 'kdramadl.exe' 'ffmpeg.exe' && rm 'kdramadl.exe'
   'ffmpeg.exe' && cd "$CWD"
 - ls -ltr "$DIST/"
 - set +e
