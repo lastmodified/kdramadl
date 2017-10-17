@@ -90,7 +90,7 @@ func main() {
 		cli.StringFlag{
 			Name: "r, resolution",
 			Usage: fmt.Sprintf(
-				"Resolution of video, for example: \"%v\". Default is \"%v\".",
+				"Resolution of video, for example: \"%v\". Default is %q.",
 				strings.Join(resolutions, "\", \""),
 				resolutions[0]),
 			Destination: &res,
@@ -98,7 +98,7 @@ func main() {
 		cli.StringFlag{
 			Name: "f, format",
 			Usage: fmt.Sprintf(
-				"Video format. Choose from: \"%v\". Default is \"%v\".",
+				"Video format. Choose from: \"%v\". Default is %q.",
 				strings.Join(formats, "\" \""),
 				formats[0]),
 			Destination: &format,
@@ -177,11 +177,11 @@ func main() {
 			ffmpegPath, path.Join(cwd, "ffmpeg"), path.Join(cwd, "ffmpeg.exe")}
 
 		var verifiedFfmpegPath string
-		for i := 0; i < len(ffmpegPaths); i++ {
-			ffmpegCmd := exec.Command(ffmpegPaths[i], "-version")
+		for _, testPath := range ffmpegPaths {
+			ffmpegCmd := exec.Command(testPath, "-version")
 			err := ffmpegCmd.Run()
 			if err == nil {
-				verifiedFfmpegPath = ffmpegPaths[i]
+				verifiedFfmpegPath = testPath
 				break
 			}
 		}
@@ -314,7 +314,7 @@ func main() {
 			err := ffmpegCmd.Run()
 			if err != nil {
 				// Do http request to check what's wrong
-				request, _ := http.NewRequest("GET", subURL, nil)
+				request, _ := http.NewRequest("GET", vidURL, nil)
 				request.Header.Set("User-Agent", userAgent)
 				response, err := httpClient.Do(request)
 
@@ -322,12 +322,14 @@ func main() {
 					return fmt.Errorf("Error downloading video: %v", err)
 				}
 				if response.StatusCode >= 400 {
-					return fmt.Errorf("Error downloading video: HTTP %v", response.StatusCode)
+					return fmt.Errorf(
+						"Error downloading video: HTTP %v %q",
+						response.StatusCode, response.Request.URL.String())
 				}
 				contentType := response.Header.Get("content-type")
 				if strings.Contains(contentType, "text/html") {
 					return fmt.Errorf(
-						"Error downloading video: Unexpected Content-Type \"%v\"",
+						"Error downloading video: Unexpected Content-Type %q",
 						contentType)
 				}
 				return fmt.Errorf("ffmpeg Error: %v", err)
@@ -337,7 +339,7 @@ func main() {
 			// rename .part file to final filename
 			err := os.Rename(partFilePath, vidFilePath)
 			if err != nil {
-				logger.Debugf("Error renaming \"%v\" to \"%v\": %v", partFilePath, vidFilePath, err)
+				logger.Debugf("Error renaming %q to %q: %v", partFilePath, vidFilePath, err)
 				return errors.New("Unable to rename file")
 			}
 		}
@@ -364,7 +366,6 @@ func genFfmpegCmd(
 	format string, partFilePath string) *exec.Cmd {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
-		"-rw_timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-reconnect", "1", "-reconnect_streamed", "1",
 		"-i", vidURL, "-i", subURL}
 	if format == formatMP4 {
