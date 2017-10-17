@@ -22,7 +22,7 @@ USAGE:
    kdramadl [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.6
+   0.0.9
 
 DESCRIPTION:
    Make sure you have ffmpeg installed in PATH or in the current folder.
@@ -32,7 +32,7 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    -c value, --code value        Download Code
-   -r value, --resolution value  Resolution of video. Choose from: "1080p" "720p" "480p" "360p". Default is "1080p".
+   -r value, --resolution value  Resolution of video, for example: "1080p", "720p", "480p", "360p". Default is "1080p".
    -f value, --format value      Video format. Choose from: "mkv" "mp4". Default is "mkv".
    --filename value              Filename to save as (without extension).
    --sub                         Download only subtitles.
@@ -47,5 +47,5 @@ GLOBAL OPTIONS:
    --version, -v                 print the version
 
 COPYRIGHT:
-   2017 https://github.com/lastmodified/
+   2017 https://github.com/lastmodified/kdramadl
 ```
