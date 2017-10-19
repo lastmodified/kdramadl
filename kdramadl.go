@@ -43,6 +43,9 @@ const formatMP4 = "mp4"
 var formats = []string{formatMKV, formatMP4}
 var resolutions = []string{"1080p", "720p", "480p", "360p"}
 
+var hostMain = "goplay.anontpp.com"
+var hostAlt = "kdrama.armsasuncion.com"
+
 var progHeader = fmt.Sprintf(
 	`=====================================================
 KDRAMA DOWNLOADER (%v)
@@ -79,7 +82,7 @@ func main() {
 	app.Name = "kdramadl"
 	app.Version = version
 	app.Copyright = "2017 https://github.com/lastmodified/kdramadl"
-	app.Usage = "Alternative downloader for https://kdrama.anontpp.com"
+	app.Usage = "Alternative downloader for https://goplay.anontpp.com"
 	app.Description = "Make sure you have ffmpeg installed in PATH or in the current folder."
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -127,7 +130,7 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:        "alt",
-			Usage:       "Use kdrama.armsasuncion.com instead of kdrama.anontpp.com",
+			Usage:       fmt.Sprintf("Use %v instead of %v", hostMain, hostAlt),
 			Destination: &altHost,
 		},
 		cli.IntFlag{
@@ -227,9 +230,9 @@ func main() {
 			return fmt.Errorf("Invalid format: %v", format)
 		}
 
-		hostname := "https://kdrama.anontpp.com/"
+		hostname := fmt.Sprintf("https://%v/", hostMain)
 		if altHost == true {
-			hostname = "https://kdrama.armsasuncion.com/"
+			hostname = fmt.Sprintf("https://%v/", hostAlt)
 		}
 		subURL := fmt.Sprintf(
 			"%v?dcode=%v&downloadccsub=1", hostname, url.QueryEscape(dlCode))

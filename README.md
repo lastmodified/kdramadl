@@ -1,6 +1,6 @@
 # kdramadl
 
- Alternative downloader for [https://kdrama.anontpp.com](https://kdrama.anontpp.com) (via [/r/koreanvariety](https://www.reddit.com/r/koreanvariety/comments/723mtd/i_created_this_website_that_streams_korean_shows/?sort=new) or [/r/KDRAMA/](https://www.reddit.com/r/KDRAMA/comments/723n1y/i_created_this_website_that_streams_korean_shows/)).
+ Alternative downloader for [https://goplay.anontpp.com](https://goplay.anontpp.com) (via [/r/koreanvariety](https://www.reddit.com/r/koreanvariety/comments/723mtd/i_created_this_website_that_streams_korean_shows/?sort=new) or [/r/KDRAMA/](https://www.reddit.com/r/KDRAMA/comments/723n1y/i_created_this_website_that_streams_korean_shows/)).
 
 ## Install
 
@@ -16,7 +16,7 @@ Alternatively, you may launch it from the Command Prompt / Terminal.
 
 ```
 NAME:
-   kdramadl - Alternative downloader for https://kdrama.anontpp.com
+   kdramadl - Alternative downloader for https://goplay.anontpp.com
 
 USAGE:
    kdramadl [global options] command [command options] [arguments...]
@@ -38,7 +38,7 @@ GLOBAL OPTIONS:
    --sub                         Download only subtitles.
    --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
    --folder value                Path to download folder.
-   --alt                         Use kdrama.armsasuncion.com instead of kdrama.anontpp.com
+   --alt                         Use kdrama.armsasuncion.com instead of goplay.anontpp.com
    --timeout value               Connection timeout interval in seconds. Default 10. (default: 10)
    --autoquit                    Automatically quit when done (skip the "Press ENTER to continue" prompt)
    --nocolor                     Disable color output
