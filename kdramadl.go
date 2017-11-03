@@ -41,8 +41,6 @@ const formatMKV = "mkv"
 const formatMP4 = "mp4"
 
 var formats = []string{formatMKV, formatMP4}
-var resolutions = []string{"1080p", "720p", "480p", "360p"}
-
 var hostMain = "goplay.anontpp.com"
 var hostAlt = "kdrama.armsasuncion.com"
 
@@ -53,7 +51,7 @@ KDRAMA DOWNLOADER (%v)
 `, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
 var invalidDlCodeCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
-var validResRegex = regexp.MustCompile(`^[0-9]{3,4}p$`)
+var validResRegex = regexp.MustCompile(`^([0-9]{3,4}p|[1-9])$`)
 var logger = &custLogger{level: levelInfo}
 
 func main() {
@@ -91,11 +89,8 @@ func main() {
 			Destination: &dlCode,
 		},
 		cli.StringFlag{
-			Name: "r, resolution",
-			Usage: fmt.Sprintf(
-				"Resolution of video, for example: \"%v\". Default is %q.",
-				strings.Join(resolutions, "\", \""),
-				resolutions[0]),
+			Name:        "r, resolution",
+			Usage:       "Resolution of video, for example: 720p.",
 			Destination: &res,
 		},
 		cli.StringFlag{
@@ -209,12 +204,10 @@ func main() {
 		}
 
 		if res == "" {
-			res = input(fmt.Sprintf(
-				"Choose a Resolution (%v). Press ENTER to use the default (%v): ",
-				strings.Join(resolutions, ", "), resolutions[0]), reader)
+			res = input("Enter a Resolution (please check on video page): ", reader)
 		}
 		if res == "" {
-			res = resolutions[0]
+			return errors.New("Resolution cannot be blank")
 		} else if validResRegex.MatchString(res) != true {
 			return fmt.Errorf("Invalid resolution: %v", res)
 		}
