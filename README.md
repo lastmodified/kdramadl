@@ -22,7 +22,7 @@ USAGE:
    kdramadl [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.9
+   0.1.2
 
 DESCRIPTION:
    Make sure you have ffmpeg installed in PATH or in the current folder.
