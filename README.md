@@ -22,7 +22,7 @@ USAGE:
    kdramadl [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.2
+   0.1.3
 
 DESCRIPTION:
    Make sure you have ffmpeg installed in PATH or in the current folder.
@@ -32,13 +32,13 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    -c value, --code value        Download Code
-   -r value, --resolution value  Resolution of video, for example: "1080p", "720p", "480p", "360p". Default is "1080p".
+   -r value, --resolution value  Resolution of video, for example: 720p.
    -f value, --format value      Video format. Choose from: "mkv" "mp4". Default is "mkv".
    --filename value              Filename to save as (without extension).
    --sub                         Download only subtitles.
    --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
    --folder value                Path to download folder.
-   --alt                         Use kdrama.armsasuncion.com instead of goplay.anontpp.com
+   --alt                         Use goplay.anontpp.com instead of kdrama.armsasuncion.com
    --timeout value               Connection timeout interval in seconds. Default 10. (default: 10)
    --autoquit                    Automatically quit when done (skip the "Press ENTER to continue" prompt)
    --nocolor                     Disable color output
