@@ -50,3 +50,26 @@ GLOBAL OPTIONS:
 COPYRIGHT:
    2017 https://github.com/lastmodified/kdramadl
 ```
+
+### Advance Examples
+
+Using the Command Prompt / Terminal.
+
+- For Windows users, you may need to change ``kdramadl`` to ``kdramadl.exe``.
+- For MacOS/Linux users, you may need to change ``kdramadl`` to ``./kdramadl``
+
+```bash
+
+# Download resolution 720p, mp4 format and filename "example_video"
+kdramadl --code "yourcode..." --resolution "720p" --format "mp4" --filename "example_video" --folder "C:\Downloads"
+
+# Download subtitles only
+kdramadl -c "yourcode..." --filename "example_video" --sub
+
+# Download using the alternative host
+kdramadl -c "yourcode..." --resolution "1" --format "mp4" --filename "example_video" --alt
+
+# Download via proxy (that you must provide)
+kdramadl -c "yourcode..." --resolution "1" --format "mkv" --filename "example_video" --proxy "http://192.168.0.1:80"
+
+```
