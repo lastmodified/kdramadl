@@ -39,6 +39,7 @@ GLOBAL OPTIONS:
    --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
    --folder value                Path to download folder.
    --alt                         Use goplay.anontpp.com instead of kdrama.armsasuncion.com
+   --proxy value                 Proxy address (only HTTP proxies supported), example "http://127.0.0.1:80".
    --timeout value               Connection timeout interval in seconds. Default 10. (default: 10)
    --autoquit                    Automatically quit when done (skip the "Press ENTER to continue" prompt)
    --nocolor                     Disable color output

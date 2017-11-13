@@ -65,6 +65,7 @@ func main() {
 		ffmpegPath string
 		dlFolder   string
 		altHost    bool
+		proxy      string
 		timeout    int
 		autoQuit   bool
 		verbose    bool
@@ -128,6 +129,12 @@ func main() {
 			Usage:       fmt.Sprintf("Use %v instead of %v", hostMain, hostAlt),
 			Destination: &altHost,
 		},
+		cli.StringFlag{
+			Name:        "proxy",
+			Value:       "",
+			Usage:       "Proxy address (only HTTP proxies supported), example \"http://127.0.0.1:80\".",
+			Destination: &proxy,
+		},
 		cli.IntFlag{
 			Name:        "timeout",
 			Value:       10,
@@ -186,6 +193,23 @@ func main() {
 		if verifiedFfmpegPath == "" {
 			// no ffmpeg found
 			return errors.New("Unable to find valid ffmpeg path")
+		}
+
+		var httpClient *http.Client
+		if proxy == "" {
+			httpClient = &http.Client{}
+		} else {
+			proxyURL, err := url.Parse(proxy)
+			if err != nil {
+				return err
+			}
+			if !strings.HasPrefix(proxyURL.Scheme, "http") {
+				// Because ffmpeg does not support SOCKS proxies
+				return fmt.Errorf("Unsupport proxy scheme: %v", proxyURL.Scheme)
+			}
+			httpClient = &http.Client{
+				Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
+			}
 		}
 
 		if dlCode == "" {
@@ -252,8 +276,6 @@ func main() {
 		vidFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v", fileName, format))
 		partFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v.part", fileName, format))
 
-		httpClient := &http.Client{}
-
 		// Download subtitles
 		if subOnly == true || format == formatMP4 {
 
@@ -293,7 +315,8 @@ func main() {
 			ffmpegLogLevel = "info"
 		}
 		ffmpegCmd := genFfmpegCmd(
-			verifiedFfmpegPath, ffmpegLogLevel, timeout, vidURL, subURL, format, partFilePath)
+			verifiedFfmpegPath, ffmpegLogLevel, timeout,
+			vidURL, subURL, format, partFilePath, proxy)
 		logger.Debugf("Requesting %v", vidURL)
 		logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 
@@ -304,7 +327,7 @@ func main() {
 			}
 			ffmpegCmd := genFfmpegCmd(
 				verifiedFfmpegPath, ffmpegLogLevel, timeout,
-				vidURL, subURL, format, partFilePath)
+				vidURL, subURL, format, partFilePath, proxy)
 			logger.Debugf("Requesting %v", vidURL)
 			logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 			err := ffmpegCmd.Run()
@@ -359,11 +382,14 @@ func main() {
 func genFfmpegCmd(
 	ffmpegPath string, ffmpegLogLevel string, timeout int,
 	vidURL string, subURL string,
-	format string, partFilePath string) *exec.Cmd {
+	format string, partFilePath string, proxy string) *exec.Cmd {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
-		"-reconnect", "1", "-reconnect_streamed", "1",
-		"-i", vidURL, "-i", subURL}
+		"-reconnect", "1", "-reconnect_streamed", "1"}
+	if proxy != "" {
+		args = append(args, []string{"-http_proxy", proxy}...)
+	}
+	args = append(args, []string{"-i", vidURL, "-i", subURL}...)
 	if format == formatMP4 {
 		args = append(
 			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
