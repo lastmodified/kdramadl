@@ -384,7 +384,7 @@ func genFfmpegCmd(
 	vidURL string, subURL string,
 	format string, partFilePath string, proxy string) *exec.Cmd {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
-		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
+		"-timeout", fmt.Sprintf("%v", timeout), // in seconds
 		"-reconnect", "1", "-reconnect_streamed", "1"}
 	if proxy != "" {
 		args = append(args, []string{"-http_proxy", proxy}...)
