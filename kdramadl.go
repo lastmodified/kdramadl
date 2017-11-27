@@ -53,7 +53,7 @@ KDRAMA DOWNLOADER (%v)
 `, version)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
 var invalidDlCodeCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
-var validResRegex = regexp.MustCompile(`^([0-9]{3,4}p|[1-9])$`)
+var validResRegex = regexp.MustCompile(`^([0-9]{3,4}p[+]?|[1-9])$`)
 var logger = &custLogger{level: levelInfo}
 
 func main() {
