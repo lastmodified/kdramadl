@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -31,6 +32,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -69,6 +71,7 @@ func main() {
 		timeout    int
 		autoQuit   bool
 		verbose    bool
+		logFile    string
 	)
 	reader := bufio.NewReader(os.Stdin)
 
@@ -155,6 +158,12 @@ func main() {
 			Usage:       "Generate more verbose messages",
 			Destination: &verbose,
 		},
+		cli.StringFlag{
+			Name:        "logfile",
+			Value:       "",
+			Usage:       "Path to logfile (for debugging/reporting)",
+			Destination: &logFile,
+		},
 	}
 	app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
 		if isSubcommand {
@@ -167,6 +176,9 @@ func main() {
 	}
 	app.Action = func(c *cli.Context) error {
 
+		if logFile != "" {
+			logger.logFile = logFile
+		}
 		if c.Bool("nocolor") {
 			color.NoColor = true
 		}
@@ -207,6 +219,7 @@ func main() {
 				// Because ffmpeg does not support SOCKS proxies
 				return fmt.Errorf("Unsupport proxy scheme: %v", proxyURL.Scheme)
 			}
+			logger.Debugf("Using proxy: %v", proxy)
 			httpClient = &http.Client{
 				Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
 			}
@@ -270,8 +283,8 @@ func main() {
 			absFolderPath = cwd
 		}
 		logger.Debugf(
-			"Download Code: %v, Resolution: %v, Filename: %v, Format: %v, Folder: %v",
-			dlCode, res, fileName, format, absFolderPath)
+			"App Version: %v, Download Code: %v, Resolution: %v, Filename: %v, Format: %v, Folder: %v, Proxy: %v",
+			version, dlCode, res, fileName, format, absFolderPath, proxy)
 		subFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.srt", fileName))
 		vidFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v", fileName, format))
 		partFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v.part", fileName, format))
@@ -316,22 +329,33 @@ func main() {
 		}
 		ffmpegCmd := genFfmpegCmd(
 			verifiedFfmpegPath, ffmpegLogLevel, timeout,
-			vidURL, subURL, format, partFilePath, proxy)
+			vidURL, subURL, format, partFilePath, proxy, false)
 		logger.Debugf("Requesting %v", vidURL)
 		logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 
 		if err := ffmpegCmd.Run(); err != nil {
+			logger.Warningf("Retrying ffmpeg command due to: %v", err.Error())
 			// Retry with a more verbose loglevel
 			if ffmpegLogLevel == "fatal" {
 				ffmpegLogLevel = "warning"
 			}
 			ffmpegCmd := genFfmpegCmd(
 				verifiedFfmpegPath, ffmpegLogLevel, timeout,
-				vidURL, subURL, format, partFilePath, proxy)
+				vidURL, subURL, format, partFilePath, proxy, true)
 			logger.Debugf("Requesting %v", vidURL)
 			logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
-			err := ffmpegCmd.Run()
-			if err != nil {
+
+			e, _ := ffmpegCmd.StderrPipe()
+			if err := ffmpegCmd.Start(); err != nil {
+				logger.Errorf("Error starting command: %v", err.Error())
+				return err
+			}
+			defer e.Close()
+			if ffmpegOutput, err := ioutil.ReadAll(e); err == nil {
+				logger.Errorf("FFMPEG Error: %s", ffmpegOutput)
+			}
+
+			if err := ffmpegCmd.Wait(); err != nil {
 				// Do http request to check what's wrong
 				request, _ := http.NewRequest("GET", vidURL, nil)
 				request.Header.Set("User-Agent", userAgent)
@@ -369,7 +393,8 @@ func main() {
 			input("\bPress ENTER to continue...", reader)
 		}
 		return nil
-	}
+	} // app.Action
+
 	err := app.Run(os.Args)
 	if err != nil {
 		logger.Errorf("%v", err)
@@ -382,7 +407,7 @@ func main() {
 func genFfmpegCmd(
 	ffmpegPath string, ffmpegLogLevel string, timeout int,
 	vidURL string, subURL string,
-	format string, partFilePath string, proxy string) *exec.Cmd {
+	format string, partFilePath string, proxy string, captureStdErr bool) *exec.Cmd {
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
 		"-reconnect", "1", "-reconnect_streamed", "1"}
@@ -403,7 +428,9 @@ func genFfmpegCmd(
 	args = append(
 		args, []string{"-bsf:a", "aac_adtstoasc", "-f", ffmpegOutputFormat, partFilePath}...)
 	ffmpegCmd := exec.Command(ffmpegPath, args...)
-	ffmpegCmd.Stderr = os.Stderr
+	if !captureStdErr {
+		ffmpegCmd.Stderr = os.Stderr
+	}
 	ffmpegCmd.Stdout = os.Stdout
 	ffmpegCmd.Stdin = os.Stdin
 	return ffmpegCmd
@@ -436,7 +463,8 @@ const (
 
 // Very basic logger with levels
 type custLogger struct {
-	level int
+	level   int
+	logFile string
 }
 
 var red = color.New(color.FgRed).SprintFunc()
@@ -446,24 +474,53 @@ var green = color.New(color.FgGreen).SprintFunc()
 var bold = color.New(color.Bold).SprintFunc()
 
 func (logger custLogger) Log(level int, message string) {
-	switch level {
-	case levelCritical:
-		message = fmt.Sprintf("%v: %v", red("CRITICAL"), message)
-	case levelError:
-		message = fmt.Sprintf("%v: %v", red("ERROR"), message)
-	case levelWarning:
-		message = fmt.Sprintf("%v: %v", yellow("WARNING"), message)
-	case levelInfo:
-		message = fmt.Sprintf("%v: %v", green("INFO"), message)
-	case levelDebug:
-		message = fmt.Sprintf("%v: %v", blue("DEBUG"), message)
+	var formattedMessage string
+	var levelName = "LOG"
+	var colorFn = func(a ...interface{}) string {
+		return fmt.Sprintf("%v", a)
 	}
 
+	switch level {
+	case levelCritical:
+		levelName = "CRITICAL"
+		colorFn = red
+	case levelError:
+		levelName = "ERROR"
+		colorFn = red
+	case levelWarning:
+		levelName = "WARNING"
+		colorFn = yellow
+	case levelInfo:
+		levelName = "INFO"
+		colorFn = green
+	case levelDebug:
+		levelName = "DEBUG"
+		colorFn = blue
+	}
+	formattedMessage = fmt.Sprintf("%v: %v", colorFn(levelName), message)
+
 	if level >= logger.level {
-		if strings.HasSuffix(message, "\n") {
-			fmt.Print(message)
+		if strings.HasSuffix(formattedMessage, "\n") {
+			fmt.Print(formattedMessage)
 		} else {
-			fmt.Println(message)
+			fmt.Println(formattedMessage)
+		}
+	}
+
+	// output everything to logfile
+	if logger.logFile != "" {
+		file, err := os.OpenFile(logger.logFile, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("%v: %v", red("ERROR"), err.Error()))
+			return
+		}
+		defer file.Close()
+		logMessage := fmt.Sprintf(
+			"%v %v ‣ %v", time.Now().UTC().Format(time.RFC3339), levelName, message)
+		if strings.HasSuffix(logMessage, "\n") {
+			file.WriteString(logMessage)
+		} else {
+			file.WriteString(fmt.Sprintf("%v\n", logMessage))
 		}
 	}
 }
