@@ -331,7 +331,7 @@ func main() {
 
 		ffmpegLogLevel := "fatal"
 		if verbose {
-			ffmpegLogLevel = "info"
+			ffmpegLogLevel = "warning"
 		}
 		ffmpegCmd := genFfmpegCmd(
 			verifiedFfmpegPath, ffmpegLogLevel, timeout,
