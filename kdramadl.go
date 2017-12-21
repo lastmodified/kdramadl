@@ -38,6 +38,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+var build = "dev"
+
 const version = "0.1.6"
 const formatMKV = "mkv"
 const formatMP4 = "mp4"
@@ -46,11 +48,10 @@ var formats = []string{formatMKV, formatMP4}
 var hostMain = "goplay.anontpp.com"
 var hostAlt = "kdrama.armsasuncion.com"
 
-var progHeader = fmt.Sprintf(
-	`=====================================================
-KDRAMA DOWNLOADER (%v)
+var progHeader = fmt.Sprintf(`=====================================================
+KDRAMA DOWNLOADER (v:%v, b:%v)
 =====================================================
-`, version)
+`, version, build)
 var userAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20150101 Firefox/47.0 (Chrome)"
 var invalidDlCodeCharRegex = regexp.MustCompile(`[^a-zA-Z0-9]`)
 var validResRegex = regexp.MustCompile(`^([0-9]{3,4}p[+]?|[1-9])$`)
