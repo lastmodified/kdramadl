@@ -22,7 +22,7 @@ USAGE:
    kdramadl [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.3
+   0.1.6
 
 DESCRIPTION:
    Make sure you have ffmpeg installed in PATH or in the current folder.
@@ -36,6 +36,8 @@ GLOBAL OPTIONS:
    -f value, --format value      Video format. Choose from: "mkv" "mp4". Default is "mkv".
    --filename value              Filename to save as (without extension).
    --sub                         Download only subtitles.
+   --hardsubs                    Enable hard subs (for mp4 only).
+   --hardsubsstyle value         Custom hard subs font style, e.g. To make subs yellow and font size 22 'FontSize=22,PrimaryColour=&H0000FFFF' (default: "PrimaryColour=&H0000FFFF")
    --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
    --folder value                Path to download folder.
    --alt                         Use goplay.anontpp.com instead of kdrama.armsasuncion.com
@@ -44,6 +46,7 @@ GLOBAL OPTIONS:
    --autoquit                    Automatically quit when done (skip the "Press ENTER to continue" prompt)
    --nocolor                     Disable color output
    --verbose                     Generate more verbose messages
+   --logfile value               Path to logfile (for debugging/reporting)
    --help, -h                    show help
    --version, -v                 print the version
 

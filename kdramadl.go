@@ -60,19 +60,21 @@ var logger = &custLogger{level: levelInfo}
 func main() {
 
 	var (
-		dlCode     string
-		res        string
-		format     string
-		fileName   string
-		subOnly    bool
-		ffmpegPath string
-		dlFolder   string
-		altHost    bool
-		proxy      string
-		timeout    int
-		autoQuit   bool
-		verbose    bool
-		logFile    string
+		dlCode        string
+		res           string
+		format        string
+		fileName      string
+		subOnly       bool
+		hardSubs      bool
+		hardSubsStyle string
+		ffmpegPath    string
+		dlFolder      string
+		altHost       bool
+		proxy         string
+		timeout       int
+		autoQuit      bool
+		verbose       bool
+		logFile       string
 	)
 	reader := bufio.NewReader(os.Stdin)
 
@@ -115,6 +117,17 @@ func main() {
 			Name:        "sub",
 			Usage:       "Download only subtitles.",
 			Destination: &subOnly,
+		},
+		cli.BoolFlag{
+			Name:        "hardsubs",
+			Usage:       "Enable hard subs (for mp4 only).",
+			Destination: &hardSubs,
+		},
+		cli.StringFlag{
+			Name:        "hardsubsstyle",
+			Value:       "PrimaryColour=&H0000FFFF",
+			Usage:       "Custom hard subs font style, e.g. To make subs blue and font size 22 'FontSize=22,PrimaryColour=&H00FF0000'",
+			Destination: &hardSubsStyle,
 		},
 		cli.StringFlag{
 			Name:        "ffmpeg",
@@ -287,8 +300,9 @@ func main() {
 			absFolderPath = cwd
 		}
 		logger.Debugf(
-			"App Version: %v, Download Code: %v, Resolution: %v, Filename: %v, Format: %v, Folder: %v, Proxy: %v",
-			version, dlCode, res, fileName, format, absFolderPath, proxy)
+			"App Version: %v, Download Code: %v, Resolution: %v, Filename: %v, Format: %v, Folder: %v, Proxy: %v, Hard Subs: %v, Hard Subs Style: %v",
+			version, dlCode, res, fileName, format, absFolderPath, proxy,
+			hardSubs, hardSubsStyle)
 
 		subFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.srt", fileName))
 		vidFilePath := path.Join(absFolderPath, fmt.Sprintf("%v.%v", fileName, format))
@@ -336,7 +350,8 @@ func main() {
 		}
 		ffmpegCmd := genFfmpegCmd(
 			verifiedFfmpegPath, ffmpegLogLevel, timeout,
-			vidURL, subURL, format, partFilePath, proxy, false)
+			vidURL, subURL, format, partFilePath, proxy,
+			subFilePath, hardSubs, hardSubsStyle, false)
 		logger.Debugf("Requesting %v", vidURL)
 		logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 
@@ -348,7 +363,8 @@ func main() {
 			}
 			ffmpegCmd := genFfmpegCmd(
 				verifiedFfmpegPath, ffmpegLogLevel, timeout,
-				vidURL, subURL, format, partFilePath, proxy, true)
+				vidURL, subURL, format, partFilePath, proxy,
+				subFilePath, hardSubs, hardSubsStyle, true)
 			logger.Debugf("Requesting %v", vidURL)
 			logger.Debugf("FFMPEG args: %v", ffmpegCmd.Args)
 
@@ -395,6 +411,11 @@ func main() {
 			}
 		}
 		if _, err := os.Stat(vidFilePath); !os.IsNotExist(err) {
+			if format == formatMP4 && hardSubs {
+				// clear srt file since it's already hard subbed
+				logger.Debugf("Deleting %v\n", subFilePath)
+				os.Remove(subFilePath)
+			}
 			logger.Infof("Saved video: %v", vidFilePath)
 		}
 		if !autoQuit {
@@ -416,7 +437,8 @@ func main() {
 func genFfmpegCmd(
 	ffmpegPath string, ffmpegLogLevel string, timeout int,
 	vidURL string, subURL string,
-	format string, partFilePath string, proxy string, captureStdErr bool) *exec.Cmd {
+	format string, partFilePath string, proxy string,
+	subFilePath string, hardSubs bool, hardSubsStyle string, captureStdErr bool) *exec.Cmd {
 
 	args := []string{"-loglevel", ffmpegLogLevel, "-stats", "-y",
 		"-timeout", fmt.Sprintf("%v", timeout*1000000), // in microseconds
@@ -424,10 +446,23 @@ func genFfmpegCmd(
 	if proxy != "" {
 		args = append(args, []string{"-http_proxy", proxy}...)
 	}
-	args = append(args, []string{"-i", vidURL, "-i", subURL}...)
+	args = append(args, []string{"-i", vidURL}...)
+	if format == formatMKV || !hardSubs {
+		args = append(args, []string{"-i", subURL}...)
+	} else {
+		if _, err := os.Stat(subFilePath); !os.IsNotExist(err) {
+			vf := fmt.Sprintf("subtitles=%v", subFilePath)
+			if hardSubsStyle != "" {
+				vf = fmt.Sprintf("subtitles=%v:force_style='%v'", subFilePath, hardSubsStyle)
+			}
+			args = append(args, []string{"-vf", vf}...)
+		}
+	}
 	if format == formatMP4 {
-		args = append(
-			args, []string{"-c:s", "mov_text", "-c:v", "libx264", "-c:a", "copy"}...)
+		if !hardSubs {
+			args = append(args, []string{"-c:s", "mov_text"}...)
+		}
+		args = append(args, []string{"-c:v", "libx264", "-c:a", "copy"}...)
 	}
 	ffmpegOutputFormat := "mp4"
 	if format == formatMKV {
