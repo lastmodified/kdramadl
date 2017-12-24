@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
+
+[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
@@ -21,7 +27,7 @@
 
 [[projects]]
   name = "github.com/urfave/cli"
-  packages = ["."]
+  packages = ["altsrc"]
   revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
   version = "v1.20.0"
 
@@ -31,9 +37,21 @@
   packages = ["unix"]
   revision = "1e2299c37cc91a509f1b12369872d27be0ce98a6"
 
+[[projects]]
+  name = "gopkg.in/urfave/cli.v1"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "287cf08546ab5e7e37d55a84f7ed3fd1db036de5"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ac45ec02f05a091203a921aa6634d9003109ce816c9ddf12e71d2dfb89811d6b"
+  inputs-digest = "7508247573a57ceda3c5e5f9373cf3383e2244abbe2a648eeb375ff0e5d5ee94"
   solver-name = "gps-cdcl"
   solver-version = 1

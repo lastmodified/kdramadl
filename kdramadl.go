@@ -35,7 +35,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/altsrc"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var build = "dev"
@@ -95,19 +96,19 @@ func main() {
 			Usage:       "Download Code",
 			Destination: &dlCode,
 		},
-		cli.StringFlag{
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "r, resolution",
 			Usage:       "Resolution of video, for example: 720p.",
 			Destination: &res,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name: "f, format",
 			Usage: fmt.Sprintf(
 				"Video format. Choose from: \"%v\". Default is %q.",
 				strings.Join(formats, "\" \""),
 				formats[0]),
 			Destination: &format,
-		},
+		}),
 		cli.StringFlag{
 			Name:        "filename",
 			Usage:       "Filename to save as (without extension).",
@@ -118,66 +119,83 @@ func main() {
 			Usage:       "Download only subtitles.",
 			Destination: &subOnly,
 		},
-		cli.BoolFlag{
+		altsrc.NewBoolFlag(cli.BoolFlag{
 			Name:        "hardsubs",
 			Usage:       "Enable hard subs (for mp4 only).",
 			Destination: &hardSubs,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "hardsubsstyle",
 			Value:       "PrimaryColour=&H0000FFFF",
 			Usage:       "Custom hard subs font style, e.g. To make subs blue and font size 22 'FontSize=22,PrimaryColour=&H00FF0000'",
 			Destination: &hardSubsStyle,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "ffmpeg",
 			Value:       "ffmpeg",
 			Usage:       "Path to ffmpeg executable.",
 			Destination: &ffmpegPath,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "folder",
 			Value:       "",
 			Usage:       "Path to download folder.",
 			Destination: &dlFolder,
-		},
-		cli.BoolFlag{
+		}),
+		altsrc.NewBoolFlag(cli.BoolFlag{
 			Name:        "alt",
-			Usage:       fmt.Sprintf("Use %v instead of %v", hostMain, hostAlt),
+			Usage:       fmt.Sprintf("Use %v instead of %v", hostAlt, hostMain),
 			Destination: &altHost,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "proxy",
 			Value:       "",
 			Usage:       "Proxy address (only HTTP proxies supported), example \"http://127.0.0.1:80\".",
 			Destination: &proxy,
-		},
-		cli.IntFlag{
+		}),
+		altsrc.NewIntFlag(cli.IntFlag{
 			Name:        "timeout",
 			Value:       10,
 			Usage:       "Connection timeout interval in seconds. Default 10.",
 			Destination: &timeout,
-		},
-		cli.BoolFlag{
+		}),
+		altsrc.NewBoolFlag(cli.BoolFlag{
 			Name:        "autoquit",
 			Usage:       "Automatically quit when done (skip the \"Press ENTER to continue\" prompt)",
 			Destination: &autoQuit,
-		},
-		cli.BoolFlag{
+		}),
+		altsrc.NewBoolFlag(cli.BoolFlag{
 			Name:  "nocolor",
 			Usage: "Disable color output",
-		},
-		cli.BoolFlag{
+		}),
+		altsrc.NewBoolFlag(cli.BoolFlag{
 			Name:        "verbose",
 			Usage:       "Generate more verbose messages",
 			Destination: &verbose,
-		},
-		cli.StringFlag{
+		}),
+		altsrc.NewStringFlag(cli.StringFlag{
 			Name:        "logfile",
 			Value:       "",
 			Usage:       "Path to logfile (for debugging/reporting)",
 			Destination: &logFile,
+		}),
+		cli.StringFlag{
+			Name:  "config",
+			Value: "kdramadl.yml",
+			Usage: "Path to custom yaml config file",
 		},
+	}
+
+	app.Before = func(c *cli.Context) error {
+		if c.String("config") != "" {
+			if _, err := os.Stat(c.String("config")); !os.IsNotExist(err) {
+				// file exists
+				err := altsrc.InitInputSourceWithContext(
+					app.Flags, altsrc.NewYamlSourceFromFlagFunc("config"))(c)
+				return err
+			}
+		}
+		return nil
 	}
 	app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
 		if isSubcommand {

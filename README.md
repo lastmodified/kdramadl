@@ -37,7 +37,7 @@ GLOBAL OPTIONS:
    --filename value              Filename to save as (without extension).
    --sub                         Download only subtitles.
    --hardsubs                    Enable hard subs (for mp4 only).
-   --hardsubsstyle value         Custom hard subs font style, e.g. To make subs yellow and font size 22 'FontSize=22,PrimaryColour=&H0000FFFF' (default: "PrimaryColour=&H0000FFFF")
+   --hardsubsstyle value         Custom hard subs font style, e.g. To make subs blue and font size 22 'FontSize=22,PrimaryColour=&H00FF0000' (default: "PrimaryColour=&H0000FFFF")
    --ffmpeg value                Path to ffmpeg executable. (default: "ffmpeg")
    --folder value                Path to download folder.
    --alt                         Use kdrama.armsasuncion.com instead of goplay.anontpp.com
@@ -47,6 +47,7 @@ GLOBAL OPTIONS:
    --nocolor                     Disable color output
    --verbose                     Generate more verbose messages
    --logfile value               Path to logfile (for debugging/reporting)
+   --config value                Path to custom yaml config file (default: "kdramadl.yml")
    --help, -h                    show help
    --version, -v                 print the version
 
