@@ -41,7 +41,7 @@ import (
 
 var build = "dev"
 
-const version = "0.1.7"
+const version = "0.1.8"
 const formatMKV = "mkv"
 const formatMP4 = "mp4"
 
