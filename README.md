@@ -57,7 +57,7 @@ COPYRIGHT:
 
 ### Advance Examples
 
-Using the Command Prompt / Terminal.
+#### Using the Command Prompt / Terminal
 
 - For Windows users, you may need to change ``kdramadl`` to ``kdramadl.exe``.
 - For MacOS/Linux users, you may need to change ``kdramadl`` to ``./kdramadl``
@@ -76,4 +76,17 @@ kdramadl -c "yourcode..." --resolution "1" --format "mp4" --filename "example_vi
 # Download via proxy (that you must provide)
 kdramadl -c "yourcode..." --resolution "1" --format "mkv" --filename "example_video" --proxy "http://192.168.0.1:80"
 
+```
+
+#### Using a Config file
+
+You can create a configuration file ``kdramadl.yml`` and populate it with your desired default options. These options will then be used when you execute the app.
+
+Example ``kdramadl.yml``:
+
+```
+format: mp4
+folder: C:\Downloads
+ffmpeg: C:\ffmpeg\ffmpeg.exe
+autoquit: true
 ```
